@@ -391,28 +391,55 @@ def callFork(f, *arguments, **kw):
 
 PARALLELPROCESSDATA = None
 
+# import multiprocessing
+# multiprocessing.set_start_method('fork');
 
 def launchParallelProcess(f, *a, **k):
-    global PARALLELPROCESSDATA
+    # global PARALLELPROCESSDATA
 
     PARALLELPROCESSDATA = [f, a, k]
     from multiprocessing import Process
-    p = Process(target=_launchParallelProcess, args=tuple([]))
+    p = Process(target=_launchParallelProcess, args=(PARALLELPROCESSDATA,))
     p.start()
     PARALLELPROCESSDATA = None
     return p
 
 
-def _launchParallelProcess():
-    global PARALLELPROCESSDATA
+def _launchParallelProcess(PARALLELPROCESSDATA):
+    # global PARALLELPROCESSDATA
     [f, a, k] = PARALLELPROCESSDATA
     try:
-        f(*a, **k)
+        wrapInThread(f)(*a, **k)
     except Exception as e:
         eprint(
             "Exception in worker during forking:\n%s" %
             (traceback.format_exc()))
         raise e
+
+
+def wrapInThread(f):
+    """
+    Returns a function that is designed to be run in a thread/threadlike process.
+    Result will be either put into the q
+    """
+    import dill
+
+    def _f(*a, **k):
+        q = k.pop("q")
+        ID = k.pop("ID")
+
+        try:
+            r = f(*a, **k)
+            q.put(dill.dumps({"result": "success",
+                   "ID": ID,
+                   "value": r}))
+        except Exception as e:
+            q.put(dill.dumps({"result": "failure",
+                   "exception": e,
+                   "stacktrace": traceback.format_exc(),
+                   "ID": ID}))
+            return
+    return _f
 
 
 def jsonBinaryInvoke(binary, message):

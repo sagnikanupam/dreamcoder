@@ -349,7 +349,7 @@ def main(args):
              "McCarthy": McCarthyPrimitives,
              "common": bootstrapTarget_extra,
              "noLength": no_length,
-             "rich": primitives}[args.pop("primitives")]()
+             "rich": primitives}[args["primitives"]]()
     haveLength = not args.pop("noLength")
     haveMap = not args.pop("noMap")
     haveUnfold = not args.pop("noUnfold")
@@ -407,4 +407,4 @@ def main(args):
         train = tasks
         test = []
 
-    explorationCompression(baseGrammar, train, testingTasks=test, **args)
+    explorationCompression(baseGrammar, train, testingTasks=test, arguments=args, **args)

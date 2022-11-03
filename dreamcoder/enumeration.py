@@ -8,6 +8,7 @@ import subprocess
 
 
 def multicoreEnumeration(g, tasks, _=None,
+                         args = None,
                          enumerationTimeout=None,
                          solver='ocaml',
                          CPUs=1,
@@ -154,7 +155,8 @@ def multicoreEnumeration(g, tasks, _=None,
                 eprint("(python) Launching %s (%d tasks) w/ %d CPUs. %f <= MDL < %f. Timeout %f." %
                        (request, len(jobs[j]), allocation[j], lowerBounds[j], lowerBounds[j] + bi, thisTimeout))
                 stopwatches[j].start()
-                parallelCallback(wrapInThread(solver),
+                parallelCallback(solver,
+                                 args=args,
                                  q=q, g=g, ID=nextID,
                                  elapsedTime=stopwatches[j].elapsed,
                                  CPUs=allocation[j],
@@ -252,7 +254,9 @@ def wrapInThread(f):
     return _f
 
 OCAML_TEST_FLAG = "is_ocaml_test" # Indicates a JSON response intended for testing.
-def solveForTask_ocaml(_=None,
+def solveForTask_ocaml(
+    _=None,
+                        args=None,
                        elapsedTime=0.,
                        CPUs=1,
                        g=None, tasks=None,
@@ -267,6 +271,15 @@ def solveForTask_ocaml(_=None,
 
     import json
 
+    from dreamcoder.domains.list.listPrimitives import basePrimitives, primitives, McCarthyPrimitives, bootstrapTarget_extra, no_length
+
+    # updates the global PRIMITIVES list in case we're on mac so we did a multithreading spawn instead of a fork
+    {"base": basePrimitives,
+    "McCarthy": McCarthyPrimitives,
+    "common": bootstrapTarget_extra,
+    "noLength": no_length,
+    "rich": primitives}[args["primitives"]]() 
+    
     def taskMessage(t):
         serialized_examples = []
         for xs, y in t.examples:

@@ -153,6 +153,8 @@ def explorationCompression(*arguments, **keywords):
 
 def ecIterator(grammar, tasks,
                _=None,
+               arguments=None,
+               primitives=None,
                useDSL=True,
                noConsolidation=False,
                mask=False,
@@ -370,7 +372,10 @@ def ecIterator(grammar, tasks,
             "n_models",
             "test_dsl_only",
             "initialTimeout",
-            "initialTimeoutIterations"
+            "initialTimeoutIterations",
+            "arguments",
+            "args",
+            "primitives",
         ]
         parameters["iterations"] = iteration
         checkpoint_params = [k for k in sorted(parameters.keys()) if k not in exclude_from_path and not k.startswith('test_')]
@@ -614,6 +619,7 @@ def ecIterator(grammar, tasks,
             wake_generative = custom_wake_generative if custom_wake_generative is not None else default_wake_generative
             topDownFrontiers, times = wake_generative(grammar, wakingTaskBatch,
                                                       solver=solver,
+                                                      args=arguments,
                                                       maximumFrontier=maximumFrontier,
                                                       enumerationTimeout=enumeration_time,
                                                       CPUs=CPUs,
@@ -953,6 +959,7 @@ def default_wake_language(grammar, tasks,
     
         
 def default_wake_generative(grammar, tasks, 
+                    args=None,
                     maximumFrontier=None,
                     enumerationTimeout=None,
                     CPUs=None,
@@ -960,6 +967,7 @@ def default_wake_generative(grammar, tasks,
                     evaluationTimeout=None,
                     max_mem_per_enumeration_thread=1000000):
     topDownFrontiers, times = multicoreEnumeration(grammar, tasks, 
+                                                   args=args,
                                                    maximumFrontier=maximumFrontier,
                                                    enumerationTimeout=enumerationTimeout,
                                                    CPUs=CPUs,
