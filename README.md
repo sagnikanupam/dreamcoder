@@ -23,8 +23,8 @@ pip install -r requirements.txt
 ```
 
 ##### Build the OCaml binaries.
-The repository contains prebuilt OCaml binaries that should run on most Linux-based machines. However, to build the OCaml binaries from scratch, you can run the following from the root of the repo.
-1. Install Opam.
+To build the OCaml binaries from scratch, you can run the following from the root of the repo. Tested on Ubuntu 18.04 and OS X 12.3 (M1).
+1. Install Opam. (e.g. https://opam.ocaml.org/doc/Install.html)
 ```
 sudo apt install opam
 ```
@@ -36,6 +36,15 @@ make setup-ocaml
 ```
 make
 ```
+
+(WIP) Test the enumeration with
+
+```
+python3 bin/list.py --primitives McCarthy --dataset bootstrap --structurePenalty 1. --pseudoCounts 30 --arity 4 -t 10 --taskReranker unsolved --topK 5 --maximumFrontier 5 --CPUs 10
+```
+which will crash :) but not before successfully doing some enumeration
+
+
 
 ##### Download Moses.
 The codebase uses the [Moses](http://www.statmt.org/moses/?n=Moses.Releases) statistical machine translation system to implement the joint generative model for translating between program and natural language tokens.
