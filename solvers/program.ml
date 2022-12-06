@@ -4,6 +4,7 @@ open Parser
 open Utils
 open Type
 open Str
+open MathDomain
 
 type program =
   | Index of int
@@ -1427,4 +1428,20 @@ let primitive_rrevcdr = primitive "_rrevcdr" ((tlist tsubstr) @> (tlist tsubstr)
   let arr = Array.of_list l in
   let slice = Array.sub arr 0 (Array.length arr - 1) in
   Array.to_list slice
-  );;
+  )
+
+let primitive_increment2 = primitive "incr2" (tint @> tint) (fun x -> 2+x)
+
+(* Sagnik - MathDomain Code *)
+let primitive_mathDomain_add = primitive "mathDomain_add" (tstring @> tint @> tstring) MathDomain._add
+let primitive_mathDomain_sub = primitive "mathDomain_sub" (tstring @> tint @>  tstring) MathDomain._sub
+let primitive_mathDomain_mult = primitive "mathDomain_mult" (tstring @> tint @>  tstring) MathDomain._mult
+let primitive_mathDomain_div = primitive "mathDomain_div" (tstring @> tint @>  tstring) MathDomain._div
+let primitive_mathDomain_lrotate = primitive "mathDomain_lrotate" (tstring @> tint @>  tstring) MathDomain._lrotate
+
+let primitive_mathDomain_rrotate = primitive "mathDomain_rrotate" (tstring @> tint @>  tstring) MathDomain._rrotate
+
+let primitive_mathDomain_simplify = primitive "mathDomain_simplify" (tstring @> tint @>  tstring) MathDomain._simplify
+
+let primitive_mathDomain_swap = primitive "mathDomain_swap" (tstring @> tint @>  tstring) MathDomain._swap
+;;
