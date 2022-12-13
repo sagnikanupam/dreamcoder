@@ -132,17 +132,17 @@ def _rotate_right_prime(s):
 
 fs = [_rotate_front, _rotate_back, _rotate_left, _rotate_right, _rotate_up, _rotate_down, _rotate_front_prime, _rotate_back_prime, _rotate_left_prime, _rotate_right_prime, _rotate_up_prime, _rotate_down_prime]
 
-def scrambleN(n):
+def scrambleN(inds):
     conf = solved_conf
-    for i in range(n):
-        conf = fs[random.randint(0, len(fs)-1)](conf)
+    for i in range(len(inds)):
+        conf = fs[inds[i]](conf)
     return {"i": conf, "o": solved_conf}
 
 def get_tstr_task(item):
     return Task(
         item["name"],
         arrow(tstr, tstr),
-        [(ex["i"], ex["o"]) for ex in item["examples"]],
+        [((ex["i"],), ex["o"]) for ex in item["examples"]],
     )
 
 
@@ -184,30 +184,46 @@ if __name__ == "__main__":
 
     grammar = Grammar.uniform(primitives)
 
-    def scramble1(): return scrambleN(1)
-    def scramble2(): return scrambleN(2)
-    def scramble3(): return scrambleN(3)
+    def scramble1(): 
+        inds = [random.randint(0, len(fs)-1)]
+        return inds
+    def scramble2(): 
+        inds = []
+        for i in range(2):
+            inds.append(random.randint(0, len(fs)-1))
+        return inds
+    def scramble3():
+        inds = []
+        for i in range(3):
+            inds.append(random.randint(0, len(fs)-1))
+        return inds
+    def scramble4():
+        inds = []
+        for i in range(4):
+            inds.append(random.randint(0, len(fs)-1))
+        return inds
 
+
+    inds1 = scramble1()
+    inds2 = scramble2()
+    inds3 = scramble3()
+    inds4 = scramble4()
     # Training data
 
     training_examples = [
-        {"name": "scramble1", "examples": [scramble1() for _ in range(5000)]},
-        {"name": "scramble2", "examples": [scramble2() for _ in range(5000)]},
-        {"name": "scramble3", "examples": [scramble3() for _ in range(5000)]},
+        {"name": "scramble1", "examples": [scrambleN(inds1) for _ in range(5000)]},
+        {"name": "scramble2", "examples": [scrambleN(inds2) for _ in range(5000)]},
+        {"name": "scramble3", "examples": [scrambleN(inds3) for _ in range(5000)]},
     ]
     training = [get_tstr_task(item) for item in training_examples]
     
-    print(training)
     # Testing data
 
-    def scramble4(): return scrambleN(4)
-
     testing_examples = [
-        {"name": "scramble4", "examples": [scramble4() for _ in range(500)]},
+        {"name": "scramble4", "examples": [scrambleN(inds4) for _ in range(500)]},
     ]
     testing = [get_tstr_task(item) for item in testing_examples]
 
-    print(testing)
     # EC iterate
 
     generator = ecIterator(grammar,
