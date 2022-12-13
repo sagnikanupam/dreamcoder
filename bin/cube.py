@@ -11,6 +11,8 @@ from dreamcoder.task import Task
 from dreamcoder.type import arrow, tint, tstr
 from dreamcoder.utilities import numberOfCPUs
 
+from dreamcoder.domains.re2.main import StringFeatureExtractor
+
 # Configuration_faces : Up|Front|Right|Back|Left|Down
 # Up 123 -> Back 321, Up 369 -> Right 321, Up 789 -> Front 123, Up 147 -> Left 123
 solved_conf = "rrrrrrrrr|bbbbbbbbb|wwwwwwwww|ggggggggg|yyyyyyyyy|ooooooooo"
@@ -155,7 +157,7 @@ if __name__ == "__main__":
         iterations=3, recognitionTimeout=3600,
         a=3, maximumFrontier=10, topK=2, pseudoCounts=30.0,
         helmholtzRatio=0.5, structurePenalty=1.,
-        CPUs=numberOfCPUs())
+        CPUs=numberOfCPUs(), featureExtractor=StringFeatureExtractor, recognition_0=["examples"])
 
     timestamp = datetime.datetime.now().isoformat()
     outdir = 'experimentOutputs/demo/'
@@ -201,11 +203,13 @@ if __name__ == "__main__":
     kTrain = 10    # Training data
     nMax = 15
     datasetScrambles = []
+    A1 = 50
+    A2 = 80
     for i in range(1, nMax):
         datasetScrambles += kScrambles(min((len(fs)**i), kTrain), i)
-    print("Total Dataset Length is: " + str(len(datasetScrambles)) + " Training: " + str(len(datasetScrambles)-kTrain))
+    print("Total Dataset Length is: " + str(len(datasetScrambles)) + " Training: " + str(A2))
     training_examples = []
-    for i in range(len(datasetScrambles)-kTrain):
+    for i in range(A2):
         training_examples.append({"name": "scramble"+str(i), "examples": [config_from_indices(datasetScrambles[i]) for _ in range(5000)]})
     
     training = [get_tstr_task(item) for item in training_examples]
@@ -213,7 +217,7 @@ if __name__ == "__main__":
     # Testing data
     testing_examples = []
     
-    for i in range(len(datasetScrambles)-kTrain, len(datasetScrambles)):
+    for i in range(A1, A2):
         testing_examples.append({"name": "scramble"+str(i), "examples": [config_from_indices(datasetScrambles[i]) for _ in range(5000)]})
 
     testing = [get_tstr_task(item) for item in testing_examples]
