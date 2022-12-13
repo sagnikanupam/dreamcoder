@@ -179,7 +179,7 @@ def ecIterator(grammar, tasks,
                reuseRecognition=False,
                ensembleSize=1,
                # Recognition parameters.
-               recognition_0=["examples"],
+               recognition_0=[],
                recognition_1=[],
                # SMT parameters.
                moses_dir=None,
@@ -1227,7 +1227,7 @@ def commandlineArguments(_=None,
                          CPUs=1,
                          solver='ocaml',
                          compressor="ocaml",
-                         recognition_0=["examples"],
+                         recognition_0=[],
                          recognitionTimeout=None,
                          activation='relu',
                          helmholtzRatio=1.,
@@ -1249,7 +1249,7 @@ def commandlineArguments(_=None,
     ## Recognition models.
     parser.add_argument("--recognition_0",
                         dest="recognition_0", 
-                        default=["examples"],
+                        default=[],
                         nargs="*",
                         help="""0th recognition model. Specify a list of features to use. Choices: ["examples"]
                         Default: %s""" % recognition_0)

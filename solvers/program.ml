@@ -5,6 +5,7 @@ open Utils
 open Type
 open Str
 open MathDomain
+open CubeDomain
 
 type program =
   | Index of int
@@ -1444,4 +1445,29 @@ let primitive_mathDomain_rrotate = primitive "mathDomain_rrotate" (tstring @> ti
 let primitive_mathDomain_simplify = primitive "mathDomain_simplify" (tstring @> tint @>  tstring) MathDomain._simplify
 
 let primitive_mathDomain_swap = primitive "mathDomain_swap" (tstring @> tint @>  tstring) MathDomain._swap
-;;
+
+(* Sagnik - Rubik's Cube Code *)
+
+let primitive_cube_F = primitive "cubeF" (tstring @> tstring) CubeDomain._rotate_front
+
+let primitive_cube_B = primitive "cubeB" (tstring @> tstring) CubeDomain._rotate_back
+
+let primitive_cube_U = primitive "cubeU" (tstring @> tstring) CubeDomain._rotate_up
+
+let primitive_cube_D = primitive "cubeD" (tstring @> tstring) CubeDomain._rotate_down
+
+let primitive_cube_L = primitive "cubeL" (tstring @> tstring) CubeDomain._rotate_left
+
+let primitive_cube_R = primitive "cubeR" (tstring @> tstring) CubeDomain._rotate_right
+
+let primitive_cube_F_prime = primitive "cubeFp" (tstring @> tstring) CubeDomain._rotate_front_prime
+
+let primitive_cube_B_prime = primitive "cubeBp" (tstring @> tstring) CubeDomain._rotate_back_prime
+
+let primitive_cube_U_prime = primitive "cubeUp" (tstring @> tstring) CubeDomain._rotate_up_prime
+
+let primitive_cube_D_prime = primitive "cubeDp" (tstring @> tstring) CubeDomain._rotate_down_prime
+
+let primitive_cube_L_prime = primitive "cubeLp" (tstring @> tstring) CubeDomain._rotate_left_prime
+
+let primitive_cube_R_prime = primitive "cubeRp" (tstring @> tstring) CubeDomain._rotate_right_prime

@@ -61,7 +61,7 @@ def multicoreEnumeration(g, tasks, _=None,
 
     disableParallelism = len(jobs) == 1
     parallelCallback = launchParallelProcess if not disableParallelism else lambda f, * \
-        a, **k: f(*a, **k)
+        a, **k: wrapInThread(f)(*a, **k)
     if disableParallelism:
         eprint("Disabling parallelism on the Python side because we only have one job.")
         eprint("If you are using ocaml, there could still be parallelism.")
@@ -274,12 +274,14 @@ def solveForTask_ocaml(
     from dreamcoder.domains.list.listPrimitives import basePrimitives, primitives, McCarthyPrimitives, bootstrapTarget_extra, no_length
 
     # updates the global PRIMITIVES list in case we're on mac so we did a multithreading spawn instead of a fork
+    '''    
     {"base": basePrimitives,
     "McCarthy": McCarthyPrimitives,
     "common": bootstrapTarget_extra,
     "noLength": no_length,
     "rich": primitives}[args["primitives"]]() 
-    
+    '''
+        
     def taskMessage(t):
         serialized_examples = []
         for xs, y in t.examples:

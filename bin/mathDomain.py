@@ -10,7 +10,6 @@ from dreamcoder.program import Primitive
 from dreamcoder.task import Task
 from dreamcoder.type import arrow, tint, tstr
 from dreamcoder.utilities import numberOfCPUs
-
 from dreamcoder.domains.re2.main import StringFeatureExtractor
 
 ops = ["+", "-", "*", "/"]
@@ -400,13 +399,13 @@ print(_swap(_simplify(_simplify(_simplify(_simplify(_simplify(_lrotate(_sub(eqTr
 '''
 
 def exampleX(x):
-    return {"i": "(= ("+str(x)+") (x))", "o": "(= (x) ("+str(x)+"))"}
+    return {"i": ("(= ("+str(x)+") (x))", 0), "o": "(= (x) ("+str(x)+"))"}
 
 def get_tstr_task(item):
     return Task(
         item["name"],
-        arrow(tstr, tstr),
-        [((ex["i"],), ex["o"]) for ex in item["examples"]],
+        arrow(tstr, tint, tstr),
+        [((ex["i"][0],ex["i"][1]), ex["o"]) for ex in item["examples"]],
     )
 
 if __name__ == "__main__":
@@ -416,8 +415,7 @@ if __name__ == "__main__":
         iterations=10, recognitionTimeout=3600,
         a=3, maximumFrontier=10, topK=2, pseudoCounts=30.0,
         helmholtzRatio=0.5, structurePenalty=1.,
-        CPUs=numberOfCPUs(),
-        featureExtractor=StringFeatureExtractor)
+        CPUs=numberOfCPUs())
     
     timestamp = datetime.datetime.now().isoformat()
     outdir = 'experimentOutputs/demo/'
@@ -444,9 +442,9 @@ if __name__ == "__main__":
     def ex4(): return exampleX(4)
 
     training_examples = [
-        {"name": "add1", "examples": [ex1() for _ in range(5000)]},
-        {"name": "add2", "examples": [ex2() for _ in range(5000)]},
-        {"name": "add3", "examples": [ex3() for _ in range(5000)]},
+        {"name": "ex1", "examples": [ex1() for _ in range(5000)]},
+        {"name": "ex2", "examples": [ex2() for _ in range(5000)]},
+        {"name": "ex3", "examples": [ex3() for _ in range(5000)]},
     ]
 
     training = [get_tstr_task(item) for item in training_examples]
