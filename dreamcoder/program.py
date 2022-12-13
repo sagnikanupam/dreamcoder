@@ -165,7 +165,11 @@ class Program(object):
                 if e[0] == 'lambda':
                     assert len(e) == 2
                     return Abstraction(p(e[1]))                    
-                f = p(e[0])
+                try:
+                    f = p(e[0])
+                except:
+                    print(e, e[0])
+                    breakpoint()
                 for x in e[1:]:
                     f = Application(f,p(x))
                 return f
@@ -174,6 +178,7 @@ class Program(object):
             if e in Primitive.GLOBALS: return Primitive.GLOBALS[e]
             if e == '??' or e == '?': return FragmentVariable.single
             if e == '<HOLE>': return Hole.single
+            print(Primitive.GLOBALS)
             raise ParseFailure((s,e))
         return p(s)
 

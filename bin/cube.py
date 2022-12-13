@@ -207,6 +207,7 @@ if __name__ == "__main__":
     A2 = 80
     for i in range(1, nMax):
         datasetScrambles += kScrambles(min((len(fs)**i), kTrain), i)
+    print(datasetScrambles[65])
     print("Total Dataset Length is: " + str(len(datasetScrambles)) + " Training: " + str(A2))
     training_examples = []
     for i in range(A2):
