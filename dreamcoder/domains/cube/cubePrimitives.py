@@ -1,21 +1,11 @@
-import datetime
-import os
-import random
-
 import binutil  # required to import from dreamcoder modules
 
-from dreamcoder.ec import commandlineArguments, ecIterator
 from dreamcoder.grammar import Grammar
 from dreamcoder.program import Primitive
-from dreamcoder.task import Task
 from dreamcoder.type import arrow, tint, tstr
-from dreamcoder.utilities import numberOfCPUs
-
-from dreamcoder.domains.re2.main import StringFeatureExtractor
 
 # Configuration_faces : Up|Front|Right|Back|Left|Down
 # Up 123 -> Back 321, Up 369 -> Right 321, Up 789 -> Front 123, Up 147 -> Left 123
-solved_conf = "rrrrrrrrr|bbbbbbbbb|wwwwwwwww|ggggggggg|yyyyyyyyy|ooooooooo"
 
 def cc_rotate(s):
     return s[6] + s[3] + s[0] + s[7] + s[4] + s[1] + s[8] + s[5] + s[2]
@@ -132,42 +122,8 @@ def _rotate_left_prime(s):
 def _rotate_right_prime(s):
     return _op_prime(s, _rotate_right)
 
-fs = [_rotate_front, _rotate_back, _rotate_left, _rotate_right, _rotate_up, _rotate_down, _rotate_front_prime, _rotate_back_prime, _rotate_left_prime, _rotate_right_prime, _rotate_up_prime, _rotate_down_prime]
-
-def config_from_indices(inds):
-    conf = solved_conf
-    for i in range(len(inds)):
-        conf = fs[inds[i]](conf)
-    return {"i": conf, "o": solved_conf}
-
-def get_tstr_task(item):
-    return Task(
-        item["name"],
-        arrow(tstr, tstr),
-        [((ex["i"],), ex["o"]) for ex in item["examples"]],
-    )
-
-
-if __name__ == "__main__":
-
-    # Options more or less copied from list.py
-
-    args = commandlineArguments(
-        enumerationTimeout=100, activation='tanh',
-        iterations=3, recognitionTimeout=3600,
-        a=3, maximumFrontier=10, topK=2, pseudoCounts=30.0,
-        helmholtzRatio=0.5, structurePenalty=1.,
-        CPUs=numberOfCPUs(), featureExtractor=StringFeatureExtractor, recognition_0=["examples"])
-
-    timestamp = datetime.datetime.now().isoformat()
-    outdir = 'experimentOutputs/demo/'
-    os.makedirs(outdir, exist_ok=True)
-    outprefix = outdir + timestamp
-    args.update({"outputPrefix": outprefix})
-
-    # Create list of primitives
-
-    primitives = [
+def cubePrimitives():
+    return [
         Primitive("cubeF", arrow(tstr, tstr), _rotate_front),
         Primitive("cubeB", arrow(tstr, tstr), _rotate_back),
         Primitive("cubeL", arrow(tstr, tstr), _rotate_left),
@@ -181,53 +137,3 @@ if __name__ == "__main__":
         Primitive("cubeUp", arrow(tstr, tstr), _rotate_up_prime),
         Primitive("cubeDp", arrow(tstr, tstr), _rotate_down_prime)
     ]
-
-    # Create grammar
-
-    grammar = Grammar.uniform(primitives)
-
-    def scrambleN(n):
-        # returns a randomized sequence of n integers corresponding to n random moves
-        inds = []
-        for i in range(n):
-            inds.append(random.randint(0, len(fs)-1))
-        return inds
-
-    def kScrambles(k, n):
-        # returns a list of k n-length scrambled configs
-        scrambles = []
-        for i in range(k):
-            scrambles.append(scrambleN(n))
-        return scrambles
-
-    kTrain = 10    # Training data
-    nMax = 15
-    datasetScrambles = []
-    A1 = 50
-    A2 = 80
-    for i in range(1, nMax):
-        datasetScrambles += kScrambles(min((len(fs)**i), kTrain), i)
-    print(datasetScrambles[65])
-    print("Total Dataset Length is: " + str(len(datasetScrambles)) + " Training: " + str(A2))
-    training_examples = []
-    for i in range(A2):
-        training_examples.append({"name": "scramble"+str(i), "examples": [config_from_indices(datasetScrambles[i]) for _ in range(5000)]})
-    
-    training = [get_tstr_task(item) for item in training_examples]
-
-    # Testing data
-    testing_examples = []
-    
-    for i in range(A1, A2):
-        testing_examples.append({"name": "scramble"+str(i), "examples": [config_from_indices(datasetScrambles[i]) for _ in range(5000)]})
-
-    testing = [get_tstr_task(item) for item in testing_examples]
-
-    # EC iterate
-
-    generator = ecIterator(grammar,
-                           training,
-                           testingTasks=testing,
-                           **args)
-    for i, _ in enumerate(generator):
-        print('ecIterator count {}'.format(i))

@@ -270,11 +270,17 @@ def solveForTask_ocaml(
                        max_mem_per_enumeration_thread=1000000):
 
     import json
+    
+    from dreamcoder.domains.cube.cubePrimitives import cubePrimitives
+    # updates the global PRIMITIVES list in case we're on mac so we did a multithreading spawn instead of a fork
+    {"cube": cubePrimitives}["cube"]() 
+    
 
+    '''    
     from dreamcoder.domains.list.listPrimitives import basePrimitives, primitives, McCarthyPrimitives, bootstrapTarget_extra, no_length
 
     # updates the global PRIMITIVES list in case we're on mac so we did a multithreading spawn instead of a fork
-    '''    
+    
     {"base": basePrimitives,
     "McCarthy": McCarthyPrimitives,
     "common": bootstrapTarget_extra,
