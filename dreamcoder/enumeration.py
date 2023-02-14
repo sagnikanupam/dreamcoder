@@ -272,8 +272,10 @@ def solveForTask_ocaml(
     import json
     
     from dreamcoder.domains.cube.cubePrimitives import cubePrimitives
+    from dreamcoder.domains.mathDomain.mathDomainPrimitives import mathDomainPrimitives
     # updates the global PRIMITIVES list in case we're on mac so we did a multithreading spawn instead of a fork
     {"cube": cubePrimitives}["cube"]() 
+    {"mathDomain": mathDomainPrimitives}["mathDomain"]()
     
 
     '''    

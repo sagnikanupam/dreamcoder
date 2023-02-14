@@ -1433,19 +1433,6 @@ let primitive_rrevcdr = primitive "_rrevcdr" ((tlist tsubstr) @> (tlist tsubstr)
 
 let primitive_increment2 = primitive "incr2" (tint @> tint) (fun x -> 2+x)
 
-(* Sagnik - MathDomain Code *)
-let primitive_mathDomain_add = primitive "mathDomain_add" (tstring @> tint @> tstring) MathDomain._add
-let primitive_mathDomain_sub = primitive "mathDomain_sub" (tstring @> tint @>  tstring) MathDomain._sub
-let primitive_mathDomain_mult = primitive "mathDomain_mult" (tstring @> tint @>  tstring) MathDomain._mult
-let primitive_mathDomain_div = primitive "mathDomain_div" (tstring @> tint @>  tstring) MathDomain._div
-let primitive_mathDomain_lrotate = primitive "mathDomain_lrotate" (tstring @> tint @>  tstring) MathDomain._lrotate
-
-let primitive_mathDomain_rrotate = primitive "mathDomain_rrotate" (tstring @> tint @>  tstring) MathDomain._rrotate
-
-let primitive_mathDomain_simplify = primitive "mathDomain_simplify" (tstring @> tint @>  tstring) MathDomain._simplify
-
-let primitive_mathDomain_swap = primitive "mathDomain_swap" (tstring @> tint @>  tstring) MathDomain._swap
-
 (* Sagnik - Rubik's Cube Code *)
 
 let primitive_cube_F = primitive "cubeF" (tstring @> tstring) CubeDomain._rotate_front
@@ -1471,3 +1458,71 @@ let primitive_cube_D_prime = primitive "cubeDp" (tstring @> tstring) CubeDomain.
 let primitive_cube_L_prime = primitive "cubeLp" (tstring @> tstring) CubeDomain._rotate_left_prime
 
 let primitive_cube_R_prime = primitive "cubeRp" (tstring @> tstring) CubeDomain._rotate_right_prime
+
+(* Sagnik - MathDomain Primitives *)
+
+let primitive_mathDomain_add = primitive "mathDomain_add" (tstring @> tint @> tstring) MathDomain._add
+let primitive_mathDomain_sub = primitive "mathDomain_sub" (tstring @> tint @>  tstring) MathDomain._sub
+let primitive_mathDomain_mult = primitive "mathDomain_mult" (tstring @> tint @>  tstring) MathDomain._mult
+let primitive_mathDomain_div = primitive "mathDomain_div" (tstring @> tint @>  tstring) MathDomain._div
+let primitive_mathDomain_lrotate = primitive "mathDomain_lrotate" (tstring @> tint @>  tstring) MathDomain._lrotate
+
+let primitive_mathDomain_rrotate = primitive "mathDomain_rrotate" (tstring @> tint @>  tstring) MathDomain._rrotate
+
+let primitive_mathDomain_simplify = primitive "mathDomain_simplify" (tstring @> tint @>  tstring) MathDomain._simplify
+
+let primitive_mathDomain_swap = primitive "mathDomain_swap" (tstring @> tint @>  tstring) MathDomain._swap
+
+(* Sagnik's Math Domain Constants. Edit everytime LARGEST_CONSTANT changes in mathDomain.py. Currently set to 25. *)
+
+let primitive_mathDomain_minus_25 = primitive "mathDomain_minus_25" tint (-25)
+let primitive_mathDomain_minus_24 = primitive "mathDomain_minus_24" tint (-24)
+let primitive_mathDomain_minus_23 = primitive "mathDomain_minus_23" tint (-23)
+let primitive_mathDomain_minus_22 = primitive "mathDomain_minus_22" tint (-22)
+let primitive_mathDomain_minus_21 = primitive "mathDomain_minus_21" tint (-21)
+let primitive_mathDomain_minus_20 = primitive "mathDomain_minus_20" tint (-20)
+let primitive_mathDomain_minus_19 = primitive "mathDomain_minus_19" tint (-19)
+let primitive_mathDomain_minus_18 = primitive "mathDomain_minus_18" tint (-18)
+let primitive_mathDomain_minus_17 = primitive "mathDomain_minus_17" tint (-17)
+let primitive_mathDomain_minus_16 = primitive "mathDomain_minus_16" tint (-16)
+let primitive_mathDomain_minus_15 = primitive "mathDomain_minus_15" tint (-15)
+let primitive_mathDomain_minus_14 = primitive "mathDomain_minus_14" tint (-14)
+let primitive_mathDomain_minus_13 = primitive "mathDomain_minus_13" tint (-13)
+let primitive_mathDomain_minus_12 = primitive "mathDomain_minus_12" tint (-12)
+let primitive_mathDomain_minus_11 = primitive "mathDomain_minus_11" tint (-11)
+let primitive_mathDomain_minus_10 = primitive "mathDomain_minus_10" tint (-10)
+let primitive_mathDomain_minus_9 = primitive "mathDomain_minus_9" tint (-9)
+let primitive_mathDomain_minus_8 = primitive "mathDomain_minus_8" tint (-8)
+let primitive_mathDomain_minus_7 = primitive "mathDomain_minus_7" tint (-7)
+let primitive_mathDomain_minus_6 = primitive "mathDomain_minus_6" tint (-6)
+let primitive_mathDomain_minus_5 = primitive "mathDomain_minus_5" tint (-5)
+let primitive_mathDomain_minus_4 = primitive "mathDomain_minus_4" tint (-4)
+let primitive_mathDomain_minus_3 = primitive "mathDomain_minus_3" tint (-3)
+let primitive_mathDomain_minus_2 = primitive "mathDomain_minus_2" tint (-2)
+let primitive_mathDomain_minus_1 = primitive "mathDomain_minus_1" tint (-1)
+let primitive_mathDomain_0 = primitive "mathDomain_0" tint 0
+let primitive_mathDomain_1 = primitive "mathDomain_1" tint 1
+let primitive_mathDomain_2 = primitive "mathDomain_2" tint 2
+let primitive_mathDomain_3 = primitive "mathDomain_3" tint 3
+let primitive_mathDomain_4 = primitive "mathDomain_4" tint 4
+let primitive_mathDomain_5 = primitive "mathDomain_5" tint 5
+let primitive_mathDomain_6 = primitive "mathDomain_6" tint 6
+let primitive_mathDomain_7 = primitive "mathDomain_7" tint 7
+let primitive_mathDomain_8 = primitive "mathDomain_8" tint 8
+let primitive_mathDomain_9 = primitive "mathDomain_9" tint 9
+let primitive_mathDomain_10 = primitive "mathDomain_10" tint 10
+let primitive_mathDomain_11 = primitive "mathDomain_11" tint 11
+let primitive_mathDomain_12 = primitive "mathDomain_12" tint 12
+let primitive_mathDomain_13 = primitive "mathDomain_13" tint 13
+let primitive_mathDomain_14 = primitive "mathDomain_14" tint 14
+let primitive_mathDomain_15 = primitive "mathDomain_15" tint 15
+let primitive_mathDomain_16 = primitive "mathDomain_16" tint 16
+let primitive_mathDomain_17 = primitive "mathDomain_17" tint 17
+let primitive_mathDomain_18 = primitive "mathDomain_18" tint 18
+let primitive_mathDomain_19 = primitive "mathDomain_19" tint 19
+let primitive_mathDomain_20 = primitive "mathDomain_20" tint 20
+let primitive_mathDomain_21 = primitive "mathDomain_21" tint 21
+let primitive_mathDomain_22 = primitive "mathDomain_22" tint 22
+let primitive_mathDomain_23 = primitive "mathDomain_23" tint 23
+let primitive_mathDomain_24 = primitive "mathDomain_24" tint 24
+let primitive_mathDomain_25 = primitive "mathDomain_25" tint 25

@@ -1,16 +1,7 @@
-import datetime
-import os
-import random
-
 import binutil  # required to import from dreamcoder modules
 
-from dreamcoder.ec import commandlineArguments, ecIterator
-from dreamcoder.grammar import Grammar
 from dreamcoder.program import Primitive
-from dreamcoder.task import Task
 from dreamcoder.type import arrow, tint, tstr
-from dreamcoder.utilities import numberOfCPUs
-from dreamcoder.domains.re2.main import StringFeatureExtractor
 
 ops = ["+", "-", "*", "/"]
 
@@ -399,32 +390,8 @@ print(_swap(_simplify(_simplify(_simplify(_simplify(_simplify(_lrotate(_sub(eqTr
 #Output: (= (y) (-1))
 '''
 
-def exampleX(x):
-    return {"i": "(= ("+str(x)+") (x))", "o": "(= (x) ("+str(x)+"))"}
-
-def get_tstr_task(item):
-    return Task(
-        item["name"],
-        arrow(tstr, tstr),
-        [((ex["i"],), ex["o"]) for ex in item["examples"]],
-    )
-
-if __name__ == "__main__":
-
-    args = commandlineArguments(
-        enumerationTimeout=10, activation='tanh',
-        iterations=10, recognitionTimeout=3600,
-        a=3, maximumFrontier=10, topK=2, pseudoCounts=30.0,
-        helmholtzRatio=0.5, structurePenalty=1.,
-        CPUs=numberOfCPUs())
-    
-    timestamp = datetime.datetime.now().isoformat()
-    outdir = 'experimentOutputs/demo/'
-    os.makedirs(outdir, exist_ok=True)
-    outprefix = outdir + timestamp
-    args.update({"outputPrefix": outprefix})
-
-    primitives = [
+def mathDomainPrimitives():
+    return [
         Primitive("mathDomain_add", arrow(tstr, tint, tstr), _add),
         Primitive("mathDomain_sub", arrow(tstr, tint, tstr), _sub),
         Primitive("mathDomain_mult", arrow(tstr, tint, tstr), _mult),
@@ -434,31 +401,3 @@ if __name__ == "__main__":
         Primitive("mathDomain_simplify", arrow(tstr, tint, tstr), _simplify),
         Primitive("mathDomain_swap", arrow(tstr, tint, tstr), _swap)
     ] + [Primitive("mathDomain_minus_"+str(abs(x)), tint, x) for x in range(-LARGEST_CONSTANT, 0)] + [Primitive("mathDomain_"+str(x), tint, x) for x in range(0, LARGEST_CONSTANT+1)]
-
-    grammar = Grammar.uniform(primitives)
-
-    def ex1(): return exampleX(1)
-    def ex2(): return exampleX(2)
-    def ex3(): return exampleX(3)
-    def ex4(): return exampleX(4)
-
-    training_examples = [
-        {"name": "ex1", "examples": [ex1() for _ in range(5000)]},
-        {"name": "ex2", "examples": [ex2() for _ in range(5000)]},
-        {"name": "ex3", "examples": [ex3() for _ in range(5000)]},
-    ]
-
-    training = [get_tstr_task(item) for item in training_examples]
-
-    testing_examples = [
-        {"name": "add4", "examples": [ex4() for _ in range(500)]},
-    ]
-    
-    testing = [get_tstr_task(item) for item in testing_examples]
-    
-    generator = ecIterator(grammar,
-                           training,
-                           testingTasks=testing,
-                           **args)
-    for i, _ in enumerate(generator):
-        print('ecIterator count {}'.format(i))
