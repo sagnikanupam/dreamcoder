@@ -177,6 +177,43 @@ let lrotatehelper = function
       Node x
   | Leaf -> Leaf
 
+let distHelper = function
+| Node x -> 
+  if ( (x.value = "+" || x.value = "-") && ((getValue x.left) = "*" && (getValue x.right) = "*") )
+    then
+      let leftLeft = (getLeft x.left) in 
+        let leftRight = (getRight x.left) in 
+          let rightLeft = (getLeft x.right) in 
+            let rightRight = (getRight x.right) in 
+      if (eq (leftLeft, rightLeft))
+        then
+          Node {value=(getValue x.left); 
+          left=Node{value=x.value; left=leftRight; right=rightRight};
+          right=leftLeft}
+      else
+          if (eq (leftLeft, rightRight))
+            then
+              Node {value=(getValue x.left); 
+              left=Node{value=x.value; left=leftRight; right=rightRight};
+              right=leftLeft}
+      else
+          if (eq (leftRight, rightLeft))
+            then
+              Node {value=(getValue x.left); 
+              left=Node{value=x.value; left=leftLeft; right=rightRight};
+              right=leftRight} 
+      else
+          if (eq (leftRight, rightRight))
+            then
+              Node {value=(getValue x.left); 
+              left=Node{value=x.value; left=leftLeft; right=rightLeft};
+              right=leftRight}
+      else
+        Node x 
+    else
+      Node x
+| Leaf -> Leaf
+
 let rec genSub = fun s ->
   (* Generates all possible subtrees of a tree *)
   let eqTree = trfy s in 
@@ -216,19 +253,21 @@ let treeop = fun s i operation ->
 
 let op = fun s x opArg -> 
   (* Performs operation on x on both sides of tree. *)
-  let eqTree = trfy s in
-   let valT = getValue eqTree in 
-      let  leftVal = getLeft eqTree in 
-        let rightVal = getRight eqTree in
-          if valT = "="
-            then 
-              dtrfy( Node {value=valT;
-                   left= Node {value=opArg; left=leftVal; right=Node{value=x; left=Leaf; right=Leaf}};
-                   right= Node {value=opArg; left= Node{value=x; left=Leaf; right=Leaf}; right=rightVal};
-                   }
-                   )
-          else 
-            s
+  let allSubs = genSub s in 
+    let selectedSub = List.nth allSubs x in
+      let eqTree = trfy s in
+        let valT = getValue eqTree in 
+            let leftVal = getLeft eqTree in 
+              let rightVal = getRight eqTree in
+                if valT = "="
+                  then 
+                    dtrfy( Node {value=valT;
+                        left= Node {value=opArg; left=leftVal; right= (trfy selectedSub)};
+                        right= Node {value=opArg; left=rightVal; right= (trfy selectedSub)};
+                        }
+                        )
+                else 
+                  s
 
 let swapHelper = function
   (* Swaps left and right subtrees in a tree*)
@@ -254,6 +293,11 @@ let evalTree = fun x y z ->
     else 
       raise (Invalid_argument ("Invalid input to evalTree."^z))
 
+let rec gcd a b =
+  (* Computes Greatest Common Divisor of Two Integers*)
+  if b = 0 then a
+  else gcd b (a mod b)
+
 let rec simplifyHelper = function
   (* Simplifies an operation on two constants in a tree with root operation and constant children *)
   | Leaf -> Leaf
@@ -262,42 +306,55 @@ let rec simplifyHelper = function
       let rightSimplified = simplifyHelper x.right in
         let leftVal = int_of_string_opt (getValue leftSimplified) in
           let rightVal = int_of_string_opt (getValue rightSimplified) in 
-          if leftVal <> None &&  rightVal <> None
+          if leftVal <> None &&  rightVal <> None && x.value <> "/"
             then Node {value = 
                         string_of_int (Option.get (evalTree leftVal rightVal x.value)); 
                       left=Leaf; 
                       right=Leaf}
           else
-              if ( (x.value = "+" && leftVal = Option.some 0) || ( x.value = "*" && leftVal = Option.some 1) )
+              if leftVal <> None &&  rightVal <> None && x.value = "/"
                 then
-                  rightSimplified          
-              else if ( ( (x.value = "+" || x.value = "-") && rightVal = Option.some 0) || ( (x.value = "*" || x.value="/") && rightVal = Option.some 1) )
-                then
-                  leftSimplified
-              else if ((x.value = "-" && eq (leftSimplified, rightSimplified) && leftSimplified <> Leaf) || (x.value="*" && ((leftVal = Option.some 0) || (rightVal = Option.some 0))))
-                then
-                  trfy "(0)"
-              else if (x.value = "/" && eq (leftSimplified, rightSimplified) && leftSimplified <> Leaf)
-                then
-                  trfy "(1)"
+                  let var1 = Option.get leftVal in
+                    let var2 = Option.get rightVal in
+                      if (var1 mod var2 = 0)
+                        then 
+                          Node {value = string_of_int (Option.get (evalTree leftVal rightVal x.value)); left=Leaf; right=Leaf} 
+                        else
+                          let currGCD = gcd var1 var2 in
+                            Node {value = x.value; 
+                                  left=Node{value = string_of_int (var1 / currGCD); left=Leaf; right=Leaf}; 
+                                  right= Node {value = string_of_int (var2 / currGCD); left=Leaf; right=Leaf}}
               else
-                Node{value=x.value; left = leftSimplified ; right=rightSimplified}
+                if ( (x.value = "+" && leftVal = Option.some 0) || ( x.value = "*" && leftVal = Option.some 1) )
+                  then
+                    rightSimplified          
+                else if ( ( (x.value = "+" || x.value = "-") && rightVal = Option.some 0) || ( (x.value = "*" || x.value="/") && rightVal = Option.some 1) )
+                  then
+                    leftSimplified
+                else if ((x.value = "-" && eq (leftSimplified, rightSimplified) && leftSimplified <> Leaf) || (x.value="*" && ((leftVal = Option.some 0) || (rightVal = Option.some 0))))
+                  then
+                    trfy "(0)"
+                else if (x.value = "/" && eq (leftSimplified, rightSimplified) && leftSimplified <> Leaf)
+                  then
+                    trfy "(1)"
+                else
+                  Node{value=x.value; left = leftSimplified ; right=rightSimplified}
 
 let _add = fun s x ->
   (* Adds x on both sides of the equation *)
-  op s (string_of_int x) "+"
+  op s x "+"
 
 let _sub = fun s x ->
   (* Subtracts x on both sides of the equation *)
-  op s (string_of_int x) "-"
+  op s x "-"
 
 let _mult = fun s x ->
   (* Multiplies x on both sides of the equation*)
-  op s (string_of_int x) "*"
+  op s x "*"
 
 let _div = fun s x ->
   (* Divides by x on both sides of the equation *)
-  op s (string_of_int x) "/"
+  op s x "/"
   
 let _rrotate = fun s i ->
   (* Performs a right rotation on i-th indexed subtree of s. *)
@@ -315,3 +372,6 @@ let _simplify = fun s i ->
   (* Simplify equation stored in i-th indexed subtree of s. *)
   dtrfy (treeop s i simplifyHelper)  
 
+let _dist = fun s i ->
+  (* Implements distributive property in tree structure *)
+  dtrfy (treeop s i distHelper)  

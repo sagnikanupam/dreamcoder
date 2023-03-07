@@ -209,12 +209,12 @@ def _treeOp(s, i, op):
 
 
 def _op(s, x, op):
-  #Performs operation on x on both sides of tree.
+  #Performs operation on x-th indexed subtree on both sides of tree.
   eqTree = treefy(s)
-  x = _genSub(s)[x][1:-1]
+  subTree = _genSub(s)[x]
   if eqTree.root == '=':
-    newLeft = Tree(op, eqTree.left, Tree(x))
-    newRight = Tree(op, eqTree.right, Tree(x))
+    newLeft = Tree(op, eqTree.left, treefy(subTree))
+    newRight = Tree(op, eqTree.right, treefy(subTree))
     newTree = Tree("=", newLeft, newRight)
     return detreefy(newTree)
   return s
@@ -280,17 +280,17 @@ def _distHelper(s):
         Tree(eqTree.left.root,
              Tree(eqTree.root, eqTree.left.right, eqTree.right.right),
              eqTree.left.left))
-    elif (detreefy(eqTree.left.right) == detreefy(eqTree.right.left)):
+    if (detreefy(eqTree.left.right) == detreefy(eqTree.right.left)):
       return detreefy(
         Tree(eqTree.left.root,
              Tree(eqTree.root, eqTree.left.left, eqTree.right.right),
              eqTree.left.right))
-    elif (detreefy(eqTree.left.left) == detreefy(eqTree.right.right)):
+    if (detreefy(eqTree.left.left) == detreefy(eqTree.right.right)):
       return detreefy(
         Tree(eqTree.left.root,
              Tree(eqTree.root, eqTree.left.right, eqTree.right.left),
              eqTree.left.left))
-    elif (detreefy(eqTree.left.right) == detreefy(eqTree.right.right)):
+    if (detreefy(eqTree.left.right) == detreefy(eqTree.right.right)):
       return detreefy(
         Tree(eqTree.left.root,
              Tree(eqTree.root, eqTree.left.left, eqTree.right.left),

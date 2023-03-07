@@ -1473,6 +1473,8 @@ let primitive_mathDomain_simplify = primitive "mathDomain_simplify" (tstring @> 
 
 let primitive_mathDomain_swap = primitive "mathDomain_swap" (tstring @> tint @>  tstring) MathDomain._swap
 
+let primitive_mathDomain_dist = primitive "mathDomain_dist" (tstring @> tint @>  tstring) MathDomain._dist
+
 (* Sagnik's Math Domain Constants. Edit everytime LARGEST_CONSTANT changes in mathDomain.py. Currently set to 25. *)
 
 let primitive_mathDomain_minus_25 = primitive "mathDomain_minus_25" tint (-25)
