@@ -1,12 +1,8 @@
-import binutil  # required to import from dreamcoder modules
-
-from dreamcoder.program import Primitive
-from dreamcoder.type import arrow, tint, tstr
+#from dreamcoder.program import *
 import math
 
 ops = ["+", "-", "*", "/"]
 
-LARGEST_CONSTANT = 25
 
 class Tree:
 
@@ -257,11 +253,9 @@ def _simplifyHelper(s):
     rightSimple = right.root
     if (isNum(leftSimple) and isNum(rightSimple)):
       return _evalTree(eqTree.root, leftSimple, rightSimple)
-    elif (eqTree.root == "+" and leftSimple == 0) or (eqTree.root == "*"
-                                                      and leftSimple == 1):
+    elif (eqTree.root == "+" and leftSimple == 0) or (eqTree.root == "*" and leftSimple == 1):
       return detreefy(right)
-    elif ((eqTree.root == "+" or eqTree.root == "-") and rightSimple == 0) or (
-      (eqTree.root == "*" or eqTree.root == "/") and rightSimple == 1):
+    elif ((eqTree.root == "+" or eqTree.root == "-") and rightSimple == 0) or ((eqTree.root == "*" or eqTree.root == "/") and rightSimple == 1):
       return detreefy(left)
     elif ((eqTree.root == "-" and left == right and left.root != "None")
           or (eqTree.root == "*" and (leftSimple == 0 or rightSimple == 0))):
@@ -270,6 +264,7 @@ def _simplifyHelper(s):
       return detreefy(Tree(1))
     else:
       return detreefy(Tree(eqTree.root, left, right))
+
 
 def _distHelper(s):
   eqTree = treefy(s)
@@ -333,19 +328,6 @@ def _swap(s, i):
 def _dist(s, i):
   return _treeOp(s, i, _distHelper)
 
-
-def mathDomainPrimitives():
-    return [
-        Primitive("mathDomain_add", arrow(tstr, tint, tstr), _add),
-        Primitive("mathDomain_sub", arrow(tstr, tint, tstr), _sub),
-        Primitive("mathDomain_mult", arrow(tstr, tint, tstr), _mult),
-        Primitive("mathDomain_div", arrow(tstr, tint, tstr), _div),
-        Primitive("mathDomain_rrotate", arrow(tstr, tint, tstr), _rrotate),
-        Primitive("mathDomain_lrotate", arrow(tstr, tint, tstr), _lrotate), 
-        Primitive("mathDomain_simplify", arrow(tstr, tint, tstr), _simplify),
-        Primitive("mathDomain_dist", arrow(tstr, tint, tstr), _dist),
-        Primitive("mathDomain_swap", arrow(tstr, tint, tstr), _swap)
-    ] + [Primitive("mathDomain_minus_"+str(abs(x)), tint, x) for x in range(-LARGEST_CONSTANT, 0)] + [Primitive("mathDomain_"+str(x), tint, x) for x in range(0, LARGEST_CONSTANT+1)]
 
 '''
 ##Python Tests
@@ -440,8 +422,25 @@ eqTree = "(= (/ (+ (7) (3)) (5)) (+ (3) (y)))"
 print(_swap(_simplify(_simplify(_simplify(_simplify(_simplify(_lrotate(_sub(eqTree, 3), 8), 3), 2), 1), 3), 2), 0))
 #Output: (= (y) (-1))
 '''
+'''
+if __name__ == "__main__":
+
+    primitives = [
+        Primitive("mathDomain_add", arrow(tstr, tint, tstr), _add),
+        Primitive("mathDomain_sub", arrow(tstr, tint, tstr), _sub),
+        Primitive("mathDomain_mult", arrow(tstr, tint, tstr), _mult),
+        Primitive("mathDomain_div", arrow(tstr, tint, tstr), _div),
+        Primitive("mathDomain_rrotate", arrow(tstr, tint, tstr), _rrotate),
+        Primitive("mathDomain_lrotate", arrow(tstr, tint, tstr), _lrotate), 
+        Primitive("mathDomain_simplify", arrow(tstr, tint, tstr), _simplify),
+        Primitive("mathDomain_swap", arrow(tstr, tstr), _swap)
+    ]
+
+    grammar = Grammar.uniform(primitives)
 
 '''
+
+
 def type1(a, b, c, d):
   gcd = math.gcd((a + c), (d - b))
   if (a + c) % (d - b) == 0:
@@ -503,7 +502,6 @@ print(_simplify(_rrotate(_swap(_div(_simplify(_rrotate(_swap(_sub(_simplify(_dis
 #print(exampleX(2))
 #print(exampleX(3))
 #print(exampleX(4))
-'''
 '''
 Expected Output:
 Original Tree:(= (+ (+ (1) (* (3) (x))) (4))  (* (5) (x)))
