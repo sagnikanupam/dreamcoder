@@ -6,7 +6,7 @@ import math
 
 ops = ["+", "-", "*", "/"]
 
-LARGEST_CONSTANT = 25
+LARGEST_CONSTANT = 10
 
 class Tree:
 
@@ -345,7 +345,7 @@ def mathDomainPrimitives():
         Primitive("mathDomain_simplify", arrow(tstr, tint, tstr), _simplify),
         Primitive("mathDomain_dist", arrow(tstr, tint, tstr), _dist),
         Primitive("mathDomain_swap", arrow(tstr, tint, tstr), _swap)
-    ] + [Primitive("mathDomain_minus_"+str(abs(x)), tint, x) for x in range(-LARGEST_CONSTANT, 0)] + [Primitive("mathDomain_"+str(x), tint, x) for x in range(0, LARGEST_CONSTANT+1)]
+    ] + [Primitive("mathDomain_"+str(x), tint, x) for x in range(0, LARGEST_CONSTANT+1)]
 
 '''
 ##Python Tests
