@@ -182,6 +182,19 @@ def _genSub(s):
     right = [] if eqTree.right == "None" else _genSub(detreefy(eqTree.right))
     return [s] + left + right
 
+def _size(s):
+    #Computes the number of subtrees that are formed by the current subtree
+    return len(_genSub(s))
+
+def _metric(s1, s2):
+    #Metric to compute the difference in the subtrees formed in step 1 (s1) and step 2 (s2)
+    tree1 = treefy(s1)
+    tree2 = treefy(s2)
+    tree1l = detreefy(tree1.left)
+    tree1r = detreefy(tree1.right)
+    tree2l = detreefy(tree2.left)
+    tree2r = detreefy(tree2.right)
+    return max(abs(_size(tree1l) - _size(tree2l)), abs(_size(tree1r) - _size(tree2r)))
 
 def _reconstruct(i, old, newT):
   #Reconstructs a new tree by swapping in newT in the i-th indexed subtree of old. So if subtree "k" is at the i-th index of result of genSub(old), "k" in old gets replaced by new.
