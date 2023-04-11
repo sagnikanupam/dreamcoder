@@ -301,7 +301,7 @@ Reminder: Don't forget to rebuild the OCaml binaries before proceeding to the ne
 
 ### Note
 
-If you are running on macOS, there is one extra step to take - in the file `~/dreamcoder/enumeration.py`, add `from dreamcoder.domains.[DOMAIN_NAME].DOMAIN_NAME_Primitives import DOMAIN_NAME_Primitives` under line 275 and `{"DOMAIN_NAME": DOMAIN_NAME_primitives}(DOMAIN_NAME)`.
+If you are running on macOS, there is one extra step to take - in the file `~/dreamcoder/enumeration.py`, add `from dreamcoder.domains.[DOMAIN_NAME].DOMAIN_NAME_Primitives import DOMAIN_NAME_Primitives` under line 275 and add `{"DOMAIN_NAME": DOMAIN_NAME_primitives}["DOMAIN_NAME"]()` under line 278. Comment these lines out in Linux.
 
 # Run the Script
 

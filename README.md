@@ -1,4 +1,4 @@
-# Leveraging Language for Abstraction and Program Search
+# DreamCoder-LAPS
 
 This repository is adapted from [the official LAPS branch of the dreamcoder repo](https://github.com/ellisk42/ec/tree/icml_2021_supplement) used in Leveraging Language for Abstraction and Program Search (ICML 2021, Wong et. al 2021). That branch was a static branch designed to reproduce the results in the paper, whereas this provides a template for future work using the DreamCoder/LAPS software.
 
