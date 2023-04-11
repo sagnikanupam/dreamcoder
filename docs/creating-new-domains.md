@@ -4,15 +4,16 @@ Creating New Domains
 To create new domains of problems to solve, a number of things must be done. Follow the steps below to get started.
 
 # Table of contents
+
 1. [Select a Domain](#select-a-domain)
 2. [Create a Domain Script](#create-a-domain-script)
-    1. [Add Python Imports](#add-python-imports)
-    2. [Create a commandline for the script](#create-a-commandline-for-the-script)
-    3. [Define primitives for the domain](#define-primitives-for-the-domain)
-    4. [Update OCaml Primitives](#update-ocaml-primitives)
-    5. [Create Training and Testing Tasks](#create-training-and-testing-tasks)
-    5. [Create an `ecIterator`](#create-an-eciterator)
-    5. [Final Script](#final-script)
+   1. [Add Python Imports](#add-python-imports)
+   2. [Create a commandline for the script](#create-a-commandline-for-the-script)
+   3. [Define primitives for the domain](#define-primitives-for-the-domain)
+   4. [Update OCaml Primitives](#update-ocaml-primitives)
+   5. [Create Training and Testing Tasks](#create-training-and-testing-tasks)
+   6. [Create an `ecIterator`](#create-an-eciterator)
+   7. [Final Script](#final-script)
 3. [Run the Script](#run-the-script)
 
 # Select a Domain
@@ -32,6 +33,7 @@ We can model our script after one of the other scripts in `bin/`, e.g. `bin/list
 ### Add Python Imports
 
 Lets start by adding some imports to our script:
+
 ```python
 import datetime
 import os
@@ -46,6 +48,7 @@ from dreamcoder.task import Task
 from dreamcoder.type import arrow, tint
 from dreamcoder.utilities import numberOfCPUs
 ```
+
 The `import binutil` is a funky workaround for the directory structure of this repo. You can safely ignore it for now.
 
 The other imports are going to give us the building blocks for defining a commandline, creating primitives, and other essential components to solving tasks within our new domain.
@@ -55,22 +58,27 @@ The other imports are going to give us the building blocks for defining a comman
 To create a Python `argparse` commandline for our script, we can import the `commandlineArguments()` function from the `ec.py` module, which has most of the parameters that the DreamCoder algorithm needs in order to run successfully.
 
 Here's an example with some defaults set:
+
 ```python
+from dreamcoder.domains.[DOMAIN_NAME].main import FEATURE_EXTRACTOR
 args = commandlineArguments(
     enumerationTimeout=10, activation='tanh',
     iterations=10, recognitionTimeout=3600,
     a=3, maximumFrontier=10, topK=2, pseudoCounts=30.0,
-    helmholtzRatio=0.5, structurePenalty=1.,
-    CPUs=numberOfCPUs())
+    helmholtzRatio=0.5, featureExtractor=FEATURE_EXTRACTOR, 
+    structurePenalty=1., CPUs=numberOfCPUs())
 ```
 
-Next, lets begin to define our domain.
+where the feature extractor must be specified in order to ensure that the recognition model is functioning as intended. Next, lets begin to define our domain.
 
 ### Define primitives for the domain
 
 We will create a list of primitives for our toy example next.
 
 Each member of our list must be an instance of the `Primitive` class where each primitive has a unique name that binds it to its corresponding OCaml code (discussed later), a type imported from `dreamcoder/type.py`, and a lambda function: `Primitive(name, type, func)`.
+
+Define the primitives in a `.py` file under `~/dreamcoder/domains/DOMAIN_NAME/DOMAIN_NAME_primitives.py` where `DOMAIN_NAME` refers to a unique identifier for the domain.
+
 ```python
 def _incr(x): return lambda x: x + 1
 def _incr2(x): return lambda x: x + 2
@@ -79,10 +87,16 @@ primitives = [
     Primitive("incr", arrow(tint, tint), _incr),
     Primitive("incr2", arrow(tint, tint), _incr2),
 ]
+
+def DOMAIN_NAME_primitives():
+    return primitives
 ```
 
-Then create a Grammar from the primitives:
+Then create a Grammar from the primitives in the `bin/DOMAIN_NAME.py` as follows:
+
 ```python
+from dreamcoder.domains.[DOMAIN_NAME].DOMAIN_NAME_Primitives import DOMAIN_NAME_Primitives
+primitives = DOMAIN_NAME_primitives()
 grammar = Grammar.uniform(primitives)
 ```
 
@@ -93,16 +107,19 @@ Note that *new primitives cannot currently be created without modifying OCaml co
 A limitation of the current architecture is that the primitives must also be defined in both the Python frontend and the OCaml backend (in `solvers/program.ml`).
 
 If we open up that file, we will see that there is no primitive for `incr2`, which would raise a runtime error for our new domain. So edit the `solvers/program.ml` file to add an "incr2" primitive:
+
 ```diff
  let primitive_increment = primitive "incr" (tint @> tint) (fun x -> 1+x);;
 +let primitive_increment2 = primitive "incr2" (tint @> tint) (fun x -> 2+x);;
 ```
 
 This will also mean we need to rebuild the OCaml binaries:
+
 ```
 make clean
 make
 ```
+
 See the README at the root of the repo (specifically the "Building the OCaml binaries" section) for more info.
 
 ### Create Training and Testing Tasks
@@ -110,14 +127,17 @@ See the README at the root of the repo (specifically the "Building the OCaml bin
 Now that we have defined our primitives and grammar, we can create some training and testing tasks in our domain.
 
 First off, lets define a helper function that will add some number `N` to a pseudo-random number:
+
 ```python
 def addN(n):
     x = random.choice(range(500))
     return {"i": x, "o": x + n}
 ```
+
 The return value is a dictionary format we will use to store the inputs and the outputs for each task.
 
 Each task will consist of 3 things:
+
 1. a name
 2. a mapping from input to output type (e.g. `arrow(tint, tint)`)
 3. a list of input-output pairs
@@ -125,6 +145,7 @@ Each task will consist of 3 things:
 The input-output pairs should be a list of tuples (input, output) where each input is itself a tuple.
 
 Lets define a helper function to do the work of creating tasks for us:
+
 ```python
 def get_tint_task(item):
     return Task(
@@ -135,6 +156,7 @@ def get_tint_task(item):
 ```
 
 After defining our helper functions, we can add some training data:
+
 ```python
 # Training data
 def add1(): return addN(1)
@@ -149,6 +171,7 @@ training = [get_tint_task(item) for item in training_examples]
 ```
 
 Following that, lets add a smaller amount of testing data:
+
 ```python
 # Testing data
 def add4(): return addN(4)
@@ -161,6 +184,7 @@ testing = [get_tint_task(item) for item in testing_examples]
 ### Create an `ecIterator`
 
 Finally, to get the DreamCoder algorithm to run over our tasks, we need to create an `ecIterator` in our script as follows:
+
 ```python
 generator = ecIterator(grammar,
                        training,
@@ -175,6 +199,7 @@ This will iterate over the wake and sleep cycles for our tasks.
 ### Final script
 
 The end result of our domain script might look something like this:
+
 ```python
 import datetime
 import os
@@ -188,6 +213,8 @@ from dreamcoder.program import Primitive
 from dreamcoder.task import Task
 from dreamcoder.type import arrow, tint
 from dreamcoder.utilities import numberOfCPUs
+from dreamcoder.domains.[DOMAIN_NAME].main import FEATURE_EXTRACTOR
+from dreamcoder.domains.[DOMAIN_NAME].DOMAIN_NAME_Primitives import DOMAIN_NAME_Primitives
 
 # Primitives
 def _incr(x): return lambda x: x + 1
@@ -215,8 +242,8 @@ if __name__ == "__main__":
         enumerationTimeout=10, activation='tanh',
         iterations=10, recognitionTimeout=3600,
         a=3, maximumFrontier=10, topK=2, pseudoCounts=30.0,
-        helmholtzRatio=0.5, structurePenalty=1.,
-        CPUs=numberOfCPUs())
+        helmholtzRatio=0.5, structurePenalty=1., 
+        featureExtractor=FEATURE_EXTRACTOR, CPUs=numberOfCPUs())
 
     timestamp = datetime.datetime.now().isoformat()
     outdir = 'experimentOutputs/demo/'
@@ -226,11 +253,14 @@ if __name__ == "__main__":
 
     # Create list of primitives
 
-    primitives = [
+    primitives = DOMAIN_NAME_primitives()
+    '''
+    primitives looks like this:
+    [
         Primitive("incr", arrow(tint, tint), _incr),
         Primitive("incr2", arrow(tint, tint), _incr2),
     ]
-
+    '''
     # Create grammar
 
     grammar = Grammar.uniform(primitives)
@@ -269,14 +299,20 @@ if __name__ == "__main__":
 
 Reminder: Don't forget to rebuild the OCaml binaries before proceeding to the next step!
 
+### Note
+
+If you are running on macOS, there is one extra step to take - in the file `~/dreamcoder/enumeration.py`, add `from dreamcoder.domains.[DOMAIN_NAME].DOMAIN_NAME_Primitives import DOMAIN_NAME_Primitives` under line 275 and `{"DOMAIN_NAME": DOMAIN_NAME_primitives}(DOMAIN_NAME)`.
+
 # Run the Script
 
 To run the script, run as follows:
+
 ```
 python bin/incr.py -t 2 --testingTimeout 2
 ```
 
 So within a singularity container for 2 iterations (`-i 2`):
+
 ```
 singularity exec container.img python bin/incr.py -t 2 --testingTimeout 2 -i 2
 ```
@@ -284,6 +320,7 @@ singularity exec container.img python bin/incr.py -t 2 --testingTimeout 2 -i 2
 Our script is a trivial example so we should not expect to see much improvement over the course of the iterations. The program should be solved during the first iteration.
 
 The training tasks are straightforward, so we should expect to see something like the console output showing that the algorithm found a solution for each task:
+
 ```
 Generative model enumeration results:
 HIT add1 w/ (lambda (incr $0)) ; log prior = -2.197225 ; log likelihood = 0.000000
@@ -292,6 +329,7 @@ HIT add3 w/ (lambda (incr (incr2 $0))) ; log prior = -3.295837 ; log likelihood 
 ```
 
 The console output should show that at some point the algorithm solved the testing task as well:
+
 ```
 HIT add4 w/ (lambda (incr2 (incr2 $0))) ; log prior = -3.295837 ; log likelihood = 0.000000
 ```
