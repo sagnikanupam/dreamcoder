@@ -53,3 +53,4 @@ moses_compiled/
 /test_clevr_primitives
 
 data/mathDomain/wolframAppID.py
+!data/mathDomain
