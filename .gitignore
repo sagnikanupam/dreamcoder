@@ -52,5 +52,5 @@ moses_compiled/
 /solver
 /test_clevr_primitives
 
+!data/mathDomain/*
 data/mathDomain/wolframAppID.py
-!data/mathDomain
