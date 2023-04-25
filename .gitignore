@@ -22,15 +22,10 @@ rust_compressor/target
 compressionMessages/
 container.img
 launchers/
-data/**
-!data/clevr
-!data/mathDomain/
 data/cogsci_2019/*
 data/re2
 data/geom/
 data/logo/
-!data/puddleworld/
-
 data/taskRankGraphs
 message
 sklearn-container.img
