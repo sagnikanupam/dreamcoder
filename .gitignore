@@ -51,3 +51,5 @@ moses_compiled/
 /re2Test
 /solver
 /test_clevr_primitives
+
+data/mathDomain/wolframAppID.py
