@@ -285,15 +285,17 @@ if __name__ == "__main__":
             response = client.query("Solve for x: "+equation)
             solution = list(response.results)[-1].text #Last item of generator response
 
+            equation_new = equation
+            
             for i in '1234567890':
-                equation = equation.replace(i+'x', i+' * x')
+                equation_new = equation_new.replace(i+'x', i+' * x')
 
-            prefix_eq = infix_to_prefix_conversion(equation)
+            prefix_eq = infix_to_prefix_conversion(equation_new)
 
-            if prefix_eq!=None:
+            if prefix_eq!=None and solution!="(no solutions exist)" and detreefy(treefy(prefix_eq))==prefix_eq:
                 #print("is",result)
                 prefix_sol = None
-                if solution is not None and solution!="(no solutions exist)":
+                if solution is not None:
                     prefix_sol = infix_to_prefix_conversion(solution)
                 df.loc[len(df.index)] = [equation, prefix_eq, detreefy(treefy(prefix_eq))==prefix_eq, solution, prefix_sol]
                 eq_num+=1

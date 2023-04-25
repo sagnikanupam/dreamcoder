@@ -24,7 +24,7 @@ NUM_TR = training_data.shape[0] #number of training examples
 #print(f"Number of Equations Used For Training: {NUM_TR}")
 #print(training_data)
 
-TESTING_DATASET_FILEPATH = Path.cwd()/'data'/'mathDomain'/'testingEquations.csv'
+TESTING_DATASET_FILEPATH = Path.cwd()/'data'/'mathDomain'/'conpoleDatasetPrefix.csv'
 #print(f"Testing Dataset From: {TESTING_DATASET_FILEPATH}")
 testing_data = pd.read_csv(TESTING_DATASET_FILEPATH, header=None) #pandas dataframe containing testing data
 NUM_TE = testing_data.shape[0] #number of training examples
@@ -35,7 +35,7 @@ def train_pair_X(x):
   return input_output_dict
 
 def test_pair_X(x):
-  input_output_dict = {"i": str(testing_data.iat[x, 2]), "o": str(testing_data.iat[x, 3])}
+  input_output_dict = {"i": str(testing_data.iat[x, 2]), "o": str(testing_data.iat[x, 5])}
   return input_output_dict
 
 def get_tstr_task(item):
