@@ -67,7 +67,7 @@ if __name__ == "__main__":
     
     training_equations_list = [train_pair_X(k) for k in range(NUM_TR)] 
     
-    print("Example of training equation: " + training_equations_list[0])
+    print("Example of training equation: " + str(training_equations_list[0]))
     #generate {"i":, "o":} dicts for the different training examples
     training_examples = [{"name": "tr"+str(k), "examples": [training_equations_list[k] for _ in range(5000)]} for k in range(NUM_TR)]
 
@@ -76,7 +76,7 @@ if __name__ == "__main__":
     testing_equations_list = [test_pair_X(k) for k in range(NUM_TE)] #generate {"i":, "o":} dicts for the different testing examples
     testing_examples = [{"name": "te"+str(k), "examples": [testing_equations_list[k] for _ in range(5000)]} for k in range(NUM_TE)]
 
-    print("Example of testing equation: " + testing_equations_list[0])
+    print("Example of testing equation: " + str(testing_equations_list[0]))
 
     #testing_examples = [
     #    {"name": "add4", "examples": [ex4() for _ in range(500)]},
