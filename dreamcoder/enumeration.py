@@ -152,8 +152,8 @@ def multicoreEnumeration(g, tasks, _=None,
                 g, request = j[:2]
                 bi = budgetIncrement(lowerBounds[j])
                 thisTimeout = enumerationTimeout - stopwatches[j].elapsed
-                eprint("(python) Launching %s (%d tasks) w/ %d CPUs. %f <= MDL < %f. Timeout %f." %
-                       (request, len(jobs[j]), allocation[j], lowerBounds[j], lowerBounds[j] + bi, thisTimeout))
+                #eprint("(python) Launching %s (%d tasks) w/ %d CPUs. %f <= MDL < %f. Timeout %f." %
+                #       (request, len(jobs[j]), allocation[j], lowerBounds[j], lowerBounds[j] + bi, thisTimeout))
                 stopwatches[j].start()
                 parallelCallback(solver,
                                  args=args,
