@@ -46,8 +46,8 @@ def get_tstr_task(item):
     )
 
 if __name__ == "__main__":
-    print("Training on: " + NUM_TR + " examples.")
-    print("Testing on: " + NUM_TE + " examples.")
+    print("Training on: " + str(NUM_TR) + " examples.")
+    print("Testing on: " + str(NUM_TE) + " examples.")
     args = commandlineArguments(
         enumerationTimeout=180, activation='tanh',
         iterations=5, recognitionTimeout=3600,
