@@ -15,7 +15,7 @@ from dreamcoder.utilities import numberOfCPUs
 from dreamcoder.domains.re2.main import StringFeatureExtractor
 from dreamcoder.domains.mathDomain.mathDomainPrimitives import mathDomainPrimitives
 
-TRAINING_DATASET_FILEPATHS = [Path.cwd()/'data'/'mathDomain'/'trainingEquations.csv'] + [Path.cwd()/'data'/'mathDomain'/'trainingEquations.csv']
+TRAINING_DATASET_FILEPATHS = [Path.cwd()/'data'/'mathDomain'/'trainingEquations.csv']
 
 #print(f"Training Dataset From: {TRAINING_DATASET_FILEPATHS}")
 training_data_list = [pd.read_csv(dataset, header=None) for dataset in TRAINING_DATASET_FILEPATHS] #pandas dataframe containing training data
