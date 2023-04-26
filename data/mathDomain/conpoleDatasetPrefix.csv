@@ -1,4 +1,4 @@
-,Infix_Eq,Prefix_Eg,Working,Infix_Sol,Prefix_Sol
+,Infix_Eq,Prefix_Eq,Working,Infix_Sol,Prefix_Sol
 0,"(1 / 2) = x
 ",(= (/ (1) (2)) (x)),True,x = 1/2,(= (x) (/ (1) (2)))
 1,"(((-1) / x) * x) = -2x
