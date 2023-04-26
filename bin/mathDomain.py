@@ -46,7 +46,8 @@ def get_tstr_task(item):
     )
 
 if __name__ == "__main__":
-
+    print("Training on: " + NUM_TR + " examples.")
+    print("Testing on: " + NUM_TE + " examples.")
     args = commandlineArguments(
         enumerationTimeout=180, activation='tanh',
         iterations=5, recognitionTimeout=3600,
@@ -64,13 +65,18 @@ if __name__ == "__main__":
 
     grammar = Grammar.uniform(primitives)
     
-    training_equations_list = [train_pair_X(k) for k in range(NUM_TR)] #generate {"i":, "o":} dicts for the different training examples
+    training_equations_list = [train_pair_X(k) for k in range(NUM_TR)] 
+    
+    print("Example of training equation: " + training_equations_list[0])
+    #generate {"i":, "o":} dicts for the different training examples
     training_examples = [{"name": "tr"+str(k), "examples": [training_equations_list[k] for _ in range(5000)]} for k in range(NUM_TR)]
 
     training = [get_tstr_task(item) for item in training_examples]
 
     testing_equations_list = [test_pair_X(k) for k in range(NUM_TE)] #generate {"i":, "o":} dicts for the different testing examples
     testing_examples = [{"name": "te"+str(k), "examples": [testing_equations_list[k] for _ in range(5000)]} for k in range(NUM_TE)]
+
+    print("Example of testing equation: " + testing_equations_list[0])
 
     #testing_examples = [
     #    {"name": "add4", "examples": [ex4() for _ in range(500)]},
