@@ -49,7 +49,7 @@ if __name__ == "__main__":
     print("Training on: " + str(NUM_TR) + " examples.")
     print("Testing on: " + str(NUM_TE) + " examples.")
     args = commandlineArguments(
-        enumerationTimeout=180, activation='tanh',
+        enumerationTimeout=2500, activation='tanh',
         iterations=5, recognitionTimeout=3600,
         a=3, maximumFrontier=10, topK=2, pseudoCounts=30.0,
         helmholtzRatio=0.5, structurePenalty=1.,
@@ -83,11 +83,11 @@ if __name__ == "__main__":
     #]
     
     testing = [get_tstr_task(item) for item in testing_examples]
-    #testing = []
+    testing_2 = []
 
     generator = ecIterator(grammar,
-                           training,
-                           testingTasks=testing,
+                           training+testing,
+                           testingTasks=testing_2,
                            **args)
     for i, _ in enumerate(generator):
         print('ecIterator count {}'.format(i))
