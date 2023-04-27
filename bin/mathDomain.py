@@ -83,11 +83,10 @@ if __name__ == "__main__":
     #]
     
     testing = [get_tstr_task(item) for item in testing_examples]
-    testing_2 = []
 
     generator = ecIterator(grammar,
                            training+testing,
-                           testingTasks=testing_2,
+                           testingTasks=testing,
                            **args)
     for i, _ in enumerate(generator):
         print('ecIterator count {}'.format(i))
