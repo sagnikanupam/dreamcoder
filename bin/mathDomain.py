@@ -71,10 +71,11 @@ if __name__ == "__main__":
     #generate {"i":, "o":} dicts for the different training examples
     training_examples = [{"name": "tr"+str(k), "examples": [training_equations_list[k] for _ in range(5000)]} for k in range(NUM_TR)]
 
-    training = [get_tstr_task(item) for item in training_examples]
-
     testing_equations_list = [test_pair_X(k) for k in range(NUM_TE)] #generate {"i":, "o":} dicts for the different testing examples
     testing_examples = [{"name": "te"+str(k), "examples": [testing_equations_list[k] for _ in range(5000)]} for k in range(NUM_TE)]
+
+
+    training = [get_tstr_task(item) for item in training_examples] + [get_tstr_task(item_2) for item_2 in testing_examples]
 
     print("Example of testing equation: " + str(testing_equations_list[0]))
 
@@ -82,11 +83,12 @@ if __name__ == "__main__":
     #    {"name": "add4", "examples": [ex4() for _ in range(500)]},
     #]
     
-    testing = [get_tstr_task(item) for item in testing_examples]
+    #testing = [get_tstr_task(item) for item in testing_examples]
+    testing_2 = []
 
     generator = ecIterator(grammar,
-                           training+testing,
-                           testingTasks=testing,
+                           training,
+                           testingTasks=testing_2,
                            **args)
     for i, _ in enumerate(generator):
         print('ecIterator count {}'.format(i))
