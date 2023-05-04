@@ -199,6 +199,8 @@ def clSolnEval(clSolnPath, outputSolnPath):
     metrics = []
     for i in range(df.shape[0]):
         str_soln = df.loc[i]['soln']
+        str_soln = str_soln.replace("[", "(")
+        str_soln = str_soln.replace("]", ")")
         str_eq = df.loc[i]['eqn']
         steps = str_soln.split('|')
         steps = [str_eq]+steps
@@ -247,3 +249,6 @@ if __name__ == "__main__":
     print(evaluate(test_case_2, "(= (+ (* (-1) (x)) (* (2) (x))) (-3))"))
     print(evaluate(test_case_3, "(= (1) (+ (* (2) (x)) (3)))"))
     '''
+
+    clSolnEval('mathDomainOutputs/generatedConpoleSolutions.csv', 'mathDomainOutputs/generatedConpoleSolutions-CScores.csv')
+    clSolnEval('mathDomainOutputs/generatedLemmaSolutions.csv', 'mathDomainOutputs/generatedLemmaSolutions-CScores.csv') 
