@@ -127,6 +127,27 @@ def treefy(eq):
     args.append("None")
   return Tree(args[0], treefy(args[1]), treefy(args[2]))
 
+def permit_rotations(operation_tuple):
+    """
+    Checks if operations are eligible for rotation. E.g. (x+5)-5 should resolve to (x+(5-5)), but 2-5+3 cannot resolve to 2-8. (5-x)+5 cannot resolve to 5-(x+5). 
+
+    Input: A tuple of two operations, op1 and op2, where op1 is P in the diagram at https://en.wikipedia.org/wiki/File:Tree_rotation.png, while op2 is Q, passed in the format (op1, op2). 
+    Output: A tuple of three values: (T/F, new_P_1, new_Q_2)
+    """
+    permissible_rotations = {
+    ("-", "-"): (True, "-", "+"),
+    ("-", "+"): (True, "-", "-"),
+    ("+", "+"): (True, "+", "+"),
+    ("+", "-"): (True, "+", "-"),
+    ("*", "*"): (True, "*", "*"),
+    ("*", "/"): (True, "*", "/"),
+    ("/", "/"): (True, "/", "*"),
+    ("/", "*"): (True, "/", "/")
+    }
+    if operation_tuple in permissible_rotations.keys():
+      return permissible_rotations[operation_tuple]
+    else:
+      return (False, operation_tuple[0], operation_tuple[1])
 
 def _rrotateHelper(s):
   #Right rotation of tree
@@ -138,36 +159,39 @@ def _rrotateHelper(s):
   #follow diagram at https://en.wikipedia.org/wiki/File:Tree_rotation.png
   eqTree = treefy(s)
   if eqTree.root in ops and eqTree.left.root in ops:
-    originalRoot = eqTree.root
-    upperLeft = eqTree.left.root
-    upperRight = eqTree.right
-    bottomLeft = eqTree.left.left
-    bottomRight = eqTree.left.right
-    rightSub = Tree(originalRoot, bottomRight, upperRight)
-    newTree = Tree(upperLeft, bottomLeft, rightSub)
-    return detreefy(newTree)
+    newOps = permit_rotations((eqTree.left.root, eqTree.root))
+    if newOps[0]:
+        upperLeft = newOps[1]
+        originalRoot = newOps[2]
+        upperRight = eqTree.right
+        bottomLeft = eqTree.left.left
+        bottomRight = eqTree.left.right
+        rightSub = Tree(originalRoot, bottomRight, upperRight)
+        newTree = Tree(upperLeft, bottomLeft, rightSub)
+        return detreefy(newTree)
   return s
-
 
 def _lrotateHelper(s):
   #Left rotation of tree
   #originalRoot = P
   #upperLeft = A
   #upperRight = Q
-  #bottomLeft = B
+  #bottomLeft = B 
   #bottomRight = C
   #follow diagram at https://en.wikipedia.org/wiki/File:Tree_rotation.png
   eqTree = treefy(s)
   if eqTree.root in ops and eqTree.right.root in ops:
-    originalRoot = eqTree.root
-    upperLeft = eqTree.left
-    upperRight = eqTree.right.root
-    bottomLeft = eqTree.right.left
-    bottomRight = eqTree.right.right
-    leftSub = Tree(originalRoot, upperLeft, bottomLeft)
-    newTree = Tree(upperRight, leftSub, bottomRight)
-    return detreefy(newTree)
-  return s
+    newOps = permit_rotations((eqTree.root, eqTree.right.root))
+    if newOps[0]:
+        originalRoot = newOps[1]
+        upperLeft = eqTree.left
+        upperRight = newOps[2]
+        bottomLeft = eqTree.right.left
+        bottomRight = eqTree.right.right
+        leftSub = Tree(originalRoot, upperLeft, bottomLeft)
+        newTree = Tree(upperRight, leftSub, bottomRight)
+        return detreefy(newTree)
+    return s
 
 
 def _genSub(s):

@@ -248,7 +248,11 @@ if __name__ == "__main__":
     print(evaluate(test_case_1, "(= (x) (/ (-1) (2)))"))
     print(evaluate(test_case_2, "(= (+ (* (-1) (x)) (* (2) (x))) (-3))"))
     print(evaluate(test_case_3, "(= (1) (+ (* (2) (x)) (3)))"))
-    '''
 
     clSolnEval('mathDomainOutputs/generatedConpoleSolutions.csv', 'mathDomainOutputs/generatedConpoleSolutions-CScores.csv')
-    clSolnEval('mathDomainOutputs/generatedLemmaSolutions.csv', 'mathDomainOutputs/generatedLemmaSolutions-CScores.csv') 
+    clSolnEval('mathDomainOutputs/generatedLemmaSolutions.csv', 
+    'mathDomainOutputs/generatedLemmaSolutions-CScores.csv') 
+
+    s = "(= (+ (- (x) (5)) (3)) (2))"
+    print(mdp._lrotate(mdp._rrotate(s, 1), 1))
+    '''
