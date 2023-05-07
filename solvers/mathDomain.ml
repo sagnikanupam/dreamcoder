@@ -145,18 +145,34 @@ else
       raise (Invalid_argument ("Invalid input to trfy."^s))
 ;;
 
+let permit_rotations = function
+(* Checks if rotations are permissible or not*)
+  | ("-", "-") -> (true, "-", "+")
+  | ("-", "+") -> (true, "-", "-")
+  | ("+", "+") -> (true, "+", "+")
+  | ("+", "-") -> (true, "+", "-")
+  | ("*", "*") -> (true, "*", "*")
+  | ("*", "/") -> (true, "*", "/")
+  | ("/", "/") -> (true, "/", "*")
+  | ("/", "*") -> (true, "/", "/")
+  | (a, b) -> (false, a, b)
+
 let rrotatehelper = function
   (* Helper function to perform a right rotation on the tree *)
   | Node x -> 
     if (List.mem x.value ops) && (List.mem (getValue x.left) ops)
       then
-      let originalRoot = x.value in
-        let upperLeft = getValue x.left in
-          let upperRight = x.right in
-            let bottomLeft = getLeft x.left in
-             let bottomRight = getRight x.left in 
-              let rightSub = Node {value=originalRoot; left=bottomRight; right=upperRight} in
-                Node {value=upperLeft; left=bottomLeft; right=rightSub}
+        let (permitted, newOp1, newOp2) = permit_rotations ((getValue x.left), x.value) in
+          if permitted = true then
+            let originalRoot = newOp2 in
+              let upperLeft = newOp1 in
+                let upperRight = x.right in
+                  let bottomLeft = getLeft x.left in
+                  let bottomRight = getRight x.left in 
+                    let rightSub = Node {value=originalRoot; left=bottomRight; right=upperRight} in
+                      Node {value=upperLeft; left=bottomLeft; right=rightSub}
+          else
+            Node x
     else
       Node x
   | Leaf -> Leaf
@@ -166,13 +182,17 @@ let lrotatehelper = function
   | Node x -> 
     if (List.mem x.value ops) && (List.mem (getValue x.right) ops)
       then
-      let originalRoot = x.value in
-        let upperLeft = x.left in
-          let upperRight = getValue x.right in
-            let bottomLeft = getLeft x.right in
-             let bottomRight = getRight x.right in 
-              let leftSub = Node {value=originalRoot; left=upperLeft; right=bottomLeft} in
-                Node {value=upperRight; left=leftSub; right=bottomRight}
+      let (permitted, newOp1, newOp2) = permit_rotations (x.value, (getValue x.right)) in
+      if permitted = true then
+        let originalRoot = newOp1 in
+          let upperLeft = x.left in
+            let upperRight = newOp2 in
+              let bottomLeft = getLeft x.right in
+              let bottomRight = getRight x.right in 
+                let leftSub = Node {value=originalRoot; left=upperLeft; right=bottomLeft} in
+                  Node {value=upperRight; left=leftSub; right=bottomRight}
+      else
+        Node x
     else
       Node x
   | Leaf -> Leaf
