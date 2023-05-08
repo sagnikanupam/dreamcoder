@@ -50,7 +50,7 @@ if __name__ == "__main__":
     print("Testing on: " + str(NUM_TE) + " examples.")
     args = commandlineArguments(
         enumerationTimeout=360, activation='tanh',
-        iterations=10, recognitionTimeout=3600,
+        iterations=25, recognitionTimeout=3600,
         a=3, maximumFrontier=10, topK=2, pseudoCounts=30.0,
         helmholtzRatio=0.5, structurePenalty=1.,
         CPUs=numberOfCPUs(), featureExtractor=StringFeatureExtractor, recognition_0=["examples"])
