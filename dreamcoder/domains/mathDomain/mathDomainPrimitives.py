@@ -310,8 +310,8 @@ def _simplifyHelper(s):
 
 def _distHelper(s):
   eqTree = treefy(s)
-  if (eqTree.left.root == "*" and eqTree.right.root
-      == "*") and (eqTree.root == "-" or eqTree.root == "+"):
+  if (eqTree.root == "-" or eqTree.root == "+") and (eqTree.left.root == "*" and eqTree.right.root
+      == "*"):
     if (detreefy(eqTree.left.left) == detreefy(eqTree.right.left)):
       return detreefy(
         Tree(eqTree.left.root,

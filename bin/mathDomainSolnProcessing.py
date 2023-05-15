@@ -3,6 +3,7 @@ import pandas as pd
 import binutil
 import dreamcoder.domains.mathDomain.mathDomainPrimitives as mdp
 import mathDomainPrefixConversion as mdpc
+from collections import OrderedDict 
 
 functions_dict = {
     '(_swap': mdp._swap, 
@@ -34,7 +35,7 @@ def replacements(s):
         s = s.replace(or_text, replacements_dict[or_text])
     return s
 
-def dsSolnFormat(dsSolnPath, outputSolnPath):
+def dsSolnFormat(dsSolnPath, eqnPath, outputSolnPath):
     '''
     Given a .csv file containing solutions copied from the terminal output of DreamSolver, pass the solutions through replacements() and modify the solutions to make them more readable.
     
@@ -47,19 +48,31 @@ def dsSolnFormat(dsSolnPath, outputSolnPath):
     '''
 
     df = pd.read_csv(dsSolnPath)
+    df_eq = pd.read_csv(eqnPath)
     equation_numbering_list = []
     reconstructed_solution_list = []
+    solved_eq_list = []
+    solved_eq_output_list = []
+    
 
     for i in range(df.shape[0]):
         or_eq = df.loc[i]['output']
-        equation_numbering_list.append(or_eq.split(' ')[1][2:])
-        reconstructed_solution_list.append(replacements(or_eq[or_eq.find('(') : or_eq.rfind(')')+1]))
-        
-    df['equation_number'] = equation_numbering_list
-    df['rec_soln'] = reconstructed_solution_list
-    print(df)
+        or_eq_split = or_eq.split(' ')
+        if or_eq_split[0]!="MISS":
+            if or_eq_split[1][0:2]!="tr":
+                eqn_no = or_eq_split[1][2:]
+                solved_eq_list.append(str(df_eq.iat[int(eqn_no), 2]))
+                solved_eq_output_list.append(or_eq)
+                equation_numbering_list.append(eqn_no)
+                reconstructed_solution_list.append(replacements(or_eq[or_eq.find('(') : or_eq.rfind(')')+1]))
+    df_new = pd.DataFrame()
+    df_new['output'] = solved_eq_output_list
+    df_new['equation_number'] = equation_numbering_list
+    df_new['eqn'] = solved_eq_list
+    df_new['soln'] = reconstructed_solution_list
+    print(df_new)
 
-    df.to_csv(outputSolnPath)
+    df_new.to_csv(outputSolnPath)
 
 def matchBr(s, ind):
     """
@@ -152,8 +165,8 @@ def evaluate(s, arg):
             #print("Currently, arg is: "+arg+"\n")
             evalNewArg1 = evaluate(newArg1, arg)
             evalNewArg2 = evaluate(newArg2, arg)
-            #print("Evaluation: "+ s + " and " + arg + " result in " + str(evalNewArg1) + " and " + str(evalNewArg2))
-            return evalNewArg1 + [functions_dict[init_split[0]](evalNewArg1[-1], evalNewArg2[-1])] #evalNewArg1 is appended as it is an output produced by an abstraction 
+            #print("Evaluation: "+ s + " and " + arg + " result in " + str(evalNewArg1[-1]) + " and " + str(evalNewArg2[-1]))
+            return evalNewArg1 + [functions_dict[init_split[0]](evalNewArg1[-1], evalNewArg2[-1])] #evalNewArg1 is appended as it is an output produced by an abstraction
         else:
             newArg1 = init_split[1]
             newArg2 = init_split[2][:-1]
@@ -166,7 +179,7 @@ def evaluate(s, arg):
             #print("Currently, arg is: "+arg+"\n")
             evalNewArg1 = evaluate(newArg1, arg)
             evalNewArg2 = evaluate(newArg2, arg)
-            #print("Evaluation: "+ s + " and " + arg + " result in " + str(evalNewArg1) + " and " + str(evalNewArg2))
+            #print("Evaluation: "+ s + " and " + arg + " result in " + str(evalNewArg1[-1]) + " and " + str(evalNewArg2[-1]))
             return [functions_dict[init_split[0]](evalNewArg1[-1], evalNewArg2[-1])] #evalNewArg1 is not appended as it is simply a substring
     return [s]
 
@@ -223,17 +236,62 @@ def dsSolnEval(dsSolnPath, outputSolnPath):
     df = pd.read_csv(dsSolnPath)
     metrics = []
     steps = []
+    error_count = 0
     for i in range(df.shape[0]):
-        str_soln = df.loc[i]['soln']
-        str_eq = df.loc[i]['eqn']
-        prefix_steps = evaluate(str_soln, str_eq)
-        steps.append('|'.join(prefix_steps))
-        steps = [str_eq]+steps
-        metrics.append(computeMetrics(prefix_steps))
+        try:
+            str_soln = df.loc[i]['soln']
+            str_eq = df.loc[i]['eqn']
+            prefix_steps = list(OrderedDict.fromkeys(evaluate(str_soln, str_eq)))
+            steps.append('|'.join(prefix_steps))
+            prefix_steps = [str_eq]+prefix_steps
+            metrics.append(computeMetrics(prefix_steps))
+        except:
+            error_count+=1
+            print("Equation: ")
+            print(df.loc[i]['eqn'])
+            print("Solution: ")
+            print(df.loc[i]['soln'])
+            print("Prefix_Steps:")
+            print(evaluate(df.loc[i]['soln'], df.loc[i]['eqn']))
+            steps.append('NA')
+            metrics.append('NA')
     df['steps'] = steps
     df['metrics'] = metrics
+    print("Number of Errors: "+str(error_count))
     df.to_csv(outputSolnPath)
 
+def computeResults(ds, lemma, conpole):
+    df_ds = pd.read_csv(ds)
+    df_lm = pd.read_csv(lemma)
+    df_cp = pd.read_csv(conpole)
+    lm_numsolv = 0
+    cp_numsolv = 0
+    lm_cp_rel_conc = 0
+    lm_cp_rel_conc_denom = 0 
+    ds_cp_rel_conc = 0
+    ds_cp_rel_conc_denom = 0
+    lm_soleq = df_lm['Equation Number'].values.tolist()
+    cp_soleq = df_cp['Equation Number'].values.tolist()
+    for soleq in range(len(df_ds['equation_number'])):
+        ctr1=False
+        ctr2=False        
+        if df_ds.loc[soleq]['equation_number'] in lm_soleq:
+            lm_numsolv+=1
+            ctr1=True
+        if df_ds.loc[soleq]['equation_number'] in cp_soleq:    
+            cp_numsolv+=1
+            ctr2=True
+        if ctr1 and ctr2:
+            lm_ind = lm_soleq.index(df_ds.loc[soleq]['equation_number'])
+            cp_ind = cp_soleq.index(df_ds.loc[soleq]['equation_number'])
+            lm_cp_rel_conc += (int(df_cp.loc[cp_ind]["metrics"])-int(df_lm.loc[lm_ind]["metrics"]))/int(df_cp.loc[cp_ind]["metrics"])
+            lm_cp_rel_conc_denom+=1
+            ds_cp_rel_conc+=(int(df_cp.loc[cp_ind]["metrics"])-int(df_ds.loc[soleq]["metrics"]))/int(df_cp.loc[cp_ind]["metrics"])
+            ds_cp_rel_conc_denom +=1
+    print("%age of eqs ConPoLe solved: " + str(cp_numsolv/len(df_ds['equation_number'])))
+    print("%age of eqs Lemma solved: " + str(lm_numsolv/len(df_ds['equation_number'])))
+    print("Lemma-ConPoLe metric: " + str(lm_cp_rel_conc/lm_cp_rel_conc_denom))
+    print("DS-ConPoLe metric: " + str(ds_cp_rel_conc/ds_cp_rel_conc_denom))
 if __name__ == "__main__":
 
     '''
@@ -256,3 +314,6 @@ if __name__ == "__main__":
     s = "(= (+ (- (x) (5)) (3)) (2))"
     print(mdp._lrotate(mdp._rrotate(s, 1), 1))
     '''
+    #dsSolnFormat('dc134soln.csv', 'conpoleDatasetPrefix.csv', 'dc134solnformatted.csv')
+    dsSolnEval('dc134solnformatted.csv', 'dc134solnevaluated.csv')
+    computeResults('dc134solnevaluated.csv', 'generatedLemmaSolutions-CScores.csv','generatedConpoleSolutions-CScores.csv')
