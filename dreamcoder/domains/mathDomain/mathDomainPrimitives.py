@@ -261,7 +261,7 @@ def _swapHelper(s):
   #Swaps left and right subtrees in a tree
   eqTree = treefy(s)
   newTree = eqTree
-  if eqTree.root=="+" or eqTree.root="*" or eqTree.root="=":
+  if eqTree.root=="+" or eqTree.root=="*" or eqTree.root=="=":
     newTree = Tree(eqTree.root, eqTree.right, eqTree.left)
   elif eqTree.root=="-":
     newTree = Tree("+", Tree("-", Tree(0), eqTree.right), eqTree.left)
