@@ -97,13 +97,14 @@ def matchBr(s, ind):
             return j
     return None
 
-def evaluate(s, arg):
+def evaluate(s, arg, depth):
     """
     Given a solution program expression, generate mathematical solutions as a list of prefix expressions, stored as a string separated by |.
 
     Inputs: 
         - s is a string denoting the solution program expression (already processed by replacements())
         - arg is a string containing an equation as a prefix-tree expression. This is the equation to be solved.
+        - depth is a parameter to modulate granularity of solutions, only functions with #lambdas<depth have the results of their argument included in the solution
 
     Returns:
         - a list comprising of all the steps of the DreamCoder solution i.e. all the steps we generate after evaluating abstractions 
@@ -131,9 +132,12 @@ def evaluate(s, arg):
                 #print("New ArgFunc is: "+newArgFunc)
                 #print("Currently, func is: "+s)
                 #print("Currently, arg is: "+arg+"\n")
-                evalArg = evaluate(newArgFunc, arg)
+                evalArg = evaluate(newArgFunc, arg, depth+1)
                 #print("Evaluated argument of " +s+" and " +arg + " is " +evalArg)
-                return evalArg+evaluate(newFunc, evalArg[-1]) #evalArg is appended as it is an output produced by an abstraction
+                if depth<5:
+                    return evalArg+evaluate(newFunc, evalArg[-1], depth+1) #evalArg is appended as it is an output produced by an abstraction
+                else:
+                    return evaluate(newFunc, evalArg[-1], depth+1) 
             else:
                 newFunc = s[subExpStart:funcEnd+1]
                 newArgFunc = s[funcEnd+2:subExpEnd]
@@ -141,13 +145,13 @@ def evaluate(s, arg):
                 #print("New ArgFunc is: "+newArgFunc)
                 #print("Currently, func is: "+s)
                 #print("Currently, arg is: "+arg+"\n")
-                evalArg = evaluate(newArgFunc, arg)
+                evalArg = evaluate(newArgFunc, arg, depth+1)
                 #print("Evaluated argument of " +s+" and " +arg + " is " +evalArg)
-                return evaluate(newFunc, evalArg[-1]) #evalArg is not appended as it is simply a substring
+                return evaluate(newFunc, evalArg[-1], depth+1) #evalArg is not appended as it is simply a substring
         else:
             newFunc = s[subExpStart:-1]
             print("New Func is: "+newFunc)
-            return evaluate(newFunc, arg)
+            return evaluate(newFunc, arg, depth+1)
     
     if init_split[0] in functions_dict.keys():
         if init_split[1][0]=="(":
@@ -163,10 +167,11 @@ def evaluate(s, arg):
             #print("New Arg2 is: "+newArg2)
             #print("Currently, func is: "+s)
             #print("Currently, arg is: "+arg+"\n")
-            evalNewArg1 = evaluate(newArg1, arg)
-            evalNewArg2 = evaluate(newArg2, arg)
+            evalNewArg1 = evaluate(newArg1, arg, depth+1)
+            evalNewArg2 = evaluate(newArg2, arg, depth+1)
             #print("Evaluation: "+ s + " and " + arg + " result in " + str(evalNewArg1[-1]) + " and " + str(evalNewArg2[-1]))
-            return evalNewArg1 + [functions_dict[init_split[0]](evalNewArg1[-1], evalNewArg2[-1])] #evalNewArg1 is appended as it is an output produced by an abstraction
+            #return evalNewArg1 + [functions_dict[init_split[0]](evalNewArg1[-1], evalNewArg2[-1])] #evalNewArg1 is appended as it is an output produced by an abstraction
+            return [functions_dict[init_split[0]](evalNewArg1[-1], evalNewArg2[-1])]
         else:
             newArg1 = init_split[1]
             newArg2 = init_split[2][:-1]
@@ -177,8 +182,8 @@ def evaluate(s, arg):
             #print("New Arg2 is: "+newArg2)
             #print("Currently, func is: "+s)
             #print("Currently, arg is: "+arg+"\n")
-            evalNewArg1 = evaluate(newArg1, arg)
-            evalNewArg2 = evaluate(newArg2, arg)
+            evalNewArg1 = evaluate(newArg1, arg, depth+1)
+            evalNewArg2 = evaluate(newArg2, arg, depth+1)
             #print("Evaluation: "+ s + " and " + arg + " result in " + str(evalNewArg1[-1]) + " and " + str(evalNewArg2[-1]))
             return [functions_dict[init_split[0]](evalNewArg1[-1], evalNewArg2[-1])] #evalNewArg1 is not appended as it is simply a substring
     return [s]
@@ -241,9 +246,9 @@ def dsSolnEval(dsSolnPath, outputSolnPath):
         try:
             str_soln = df.loc[i]['soln']
             str_eq = df.loc[i]['eqn']
-            prefix_steps = list(OrderedDict.fromkeys(evaluate(str_soln, str_eq)))
-            steps.append('|'.join(prefix_steps))
+            prefix_steps = evaluate(str_soln, str_eq, 0) # list(OrderedDict.fromkeys(evaluate(str_soln, str_eq, 0)))
             prefix_steps = [str_eq]+prefix_steps
+            steps.append('|'.join(prefix_steps))
             metrics.append(computeMetrics(prefix_steps))
         except:
             error_count+=1
@@ -261,6 +266,9 @@ def dsSolnEval(dsSolnPath, outputSolnPath):
     df.to_csv(outputSolnPath)
 
 def computeResults(ds, lemma, conpole):
+    '''
+    Computes metrics table in paper, takes as arguments the solutions files for DreamSolver, Lemma, and ConPoLe.
+    '''
     df_ds = pd.read_csv(ds)
     df_lm = pd.read_csv(lemma)
     df_cp = pd.read_csv(conpole)
@@ -284,6 +292,12 @@ def computeResults(ds, lemma, conpole):
         if ctr1 and ctr2:
             lm_ind = lm_soleq.index(df_ds.loc[soleq]['equation_number'])
             cp_ind = cp_soleq.index(df_ds.loc[soleq]['equation_number'])
+            print("DreamSolver: ")
+            print(df_ds.loc[soleq]["steps"])
+            print("Lemma: ")
+            print(df_lm.loc[lm_ind]["soln"])
+            print("ConPoLe: ")
+            print(df_cp.loc[cp_ind]["soln"])
             lm_cp_rel_conc += (int(df_cp.loc[cp_ind]["metrics"])-int(df_lm.loc[lm_ind]["metrics"]))/int(df_cp.loc[cp_ind]["metrics"])
             lm_cp_rel_conc_denom+=1
             ds_cp_rel_conc+=(int(df_cp.loc[cp_ind]["metrics"])-int(df_ds.loc[soleq]["metrics"]))/int(df_cp.loc[cp_ind]["metrics"])

@@ -292,7 +292,21 @@ let op = fun s x opArg ->
 let swapHelper = function
   (* Swaps left and right subtrees in a tree*)
   | Leaf -> Leaf
-  | Node x -> Node {value=x.value; left = x.right; right = x.left}
+  | Node x -> 
+    if ( x.value = "+" || x.value = "*" || x.value = "=" )
+      then Node {value=x.value; left = x.right; right = x.left}
+  else 
+    if ( x.value = "-") 
+      then Node {value="+"; 
+      left = Node{value = x.value; left = trfy "(0)"; right = x.right}; 
+      right = x.left}
+  else 
+    if ( x.value = "/")
+      then Node {value="*"; 
+      left = Node{value = x.value; left = trfy "(1)"; right = x.right}; 
+      right = x.left}
+    else
+      Node x
 
 let evalOp = function
   (* Determines operation z to perform on two confirmed integers x (z op) y *)
