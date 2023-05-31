@@ -15,10 +15,11 @@ from dreamcoder.utilities import numberOfCPUs
 from dreamcoder.domains.re2.main import StringFeatureExtractor
 from dreamcoder.domains.mathDomain.mathDomainPrimitives import mathDomainPrimitives
 
-TRAINING_DATASET_FILEPATHS = [Path.cwd()/'data'/'mathDomain'/'trainingEquations.csv']
+TRAINING_DATASET_FILEPATHS = [Path.cwd()/'data'/'mathDomain'/'trainingEquationsModified.csv']
 
 #print(f"Training Dataset From: {TRAINING_DATASET_FILEPATHS}")
-training_data_list = [pd.read_csv(dataset, header=None) for dataset in TRAINING_DATASET_FILEPATHS] #pandas dataframe containing training data
+#Check Header on Training Dataset before passing as argument
+training_data_list = [pd.read_csv(dataset) for dataset in TRAINING_DATASET_FILEPATHS] #pandas dataframe containing training data
 training_data = pd.concat([data for data in training_data_list], ignore_index=True)
 NUM_TR = training_data.shape[0] #number of training examples
 #print(f"Number of Equations Used For Training: {NUM_TR}")
@@ -31,7 +32,7 @@ NUM_TE = testing_data.shape[0] #number of training examples
 #print(f"Number of Equations Used For Testing: {NUM_TE}")
 
 def train_pair_X(x):
-  input_output_dict = {"i":str(training_data.iat[x, 2]), "o": str(training_data.iat[x, 3])}
+  input_output_dict = {"i":str(training_data.iat[x, 2]), "o": str(training_data.iat[x, 5])}
   return input_output_dict
 
 def test_pair_X(x):
@@ -49,11 +50,11 @@ if __name__ == "__main__":
     print("Training on: " + str(NUM_TR) + " examples.")
     print("Testing on: " + str(NUM_TE) + " examples.")
     args = commandlineArguments(
-        enumerationTimeout=360, activation='tanh',
+        enumerationTimeout=360, testingTimeout=360, activation='tanh',
         iterations=25, recognitionTimeout=3600,
         a=3, maximumFrontier=10, topK=2, pseudoCounts=30.0,
         helmholtzRatio=0.5, structurePenalty=1.,
-        CPUs=numberOfCPUs(), featureExtractor=StringFeatureExtractor, recognition_0=["examples"])
+        CPUs=numberOfCPUs(), max_compression=180, featureExtractor=StringFeatureExtractor, recognition_0=["examples"])
     
     timestamp = datetime.datetime.now().isoformat()
     outdir = 'experimentOutputs/demo/'
@@ -75,7 +76,8 @@ if __name__ == "__main__":
     testing_examples = [{"name": "te"+str(k), "examples": [testing_equations_list[k] for _ in range(5000)]} for k in range(NUM_TE)]
 
 
-    training = [get_tstr_task(item) for item in training_examples] + [get_tstr_task(item_2) for item_2 in testing_examples]
+    training = [get_tstr_task(item) for item in training_examples] 
+    #+ [get_tstr_task(item_2) for item_2 in testing_examples]
 
     print("Example of testing equation: " + str(testing_equations_list[0]))
 
@@ -83,12 +85,12 @@ if __name__ == "__main__":
     #    {"name": "add4", "examples": [ex4() for _ in range(500)]},
     #]
     
-    #testing = [get_tstr_task(item) for item in testing_examples]
-    testing_2 = []
+    testing = [get_tstr_task(item) for item in testing_examples]
+    #testing_2 = []
 
     generator = ecIterator(grammar,
                            training,
-                           testingTasks=testing_2,
+                           testingTasks=testing,
                            **args)
     for i, _ in enumerate(generator):
         print('ecIterator count {}'.format(i))

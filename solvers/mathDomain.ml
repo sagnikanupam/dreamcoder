@@ -198,41 +198,79 @@ let lrotatehelper = function
   | Leaf -> Leaf
 
 let distHelper = function
-| Node x -> 
-  if ( (x.value = "+" || x.value = "-") && ((getValue x.left) = "*" && (getValue x.right) = "*") )
-    then
-      let leftLeft = (getLeft x.left) in 
-        let leftRight = (getRight x.left) in 
-          let rightLeft = (getLeft x.right) in 
-            let rightRight = (getRight x.right) in 
-      if (eq (leftLeft, rightLeft))
-        then
-          Node {value=(getValue x.left); 
-          left=Node{value=x.value; left=leftRight; right=rightRight};
-          right=leftLeft}
-      else
-          if (eq (leftLeft, rightRight))
+| Node x ->   
+let leftLeft = (getLeft x.left) in 
+  let leftRight = (getRight x.left) in 
+    let rightLeft = (getLeft x.right) in 
+      let rightRight = (getRight x.right) in 
+        if ((x.value = "+" || x.value = "-")) 
+          then 
+          if ((getValue x.left) = "*" && (getValue x.right) = "*") || ((getValue x.left) = "/" && (getValue x.right) = "/")
             then
-              Node {value=(getValue x.left); 
-              left=Node{value=x.value; left=leftRight; right=rightRight};
-              right=leftLeft}
-      else
-          if (eq (leftRight, rightLeft))
-            then
-              Node {value=(getValue x.left); 
-              left=Node{value=x.value; left=leftLeft; right=rightRight};
-              right=leftRight} 
-      else
-          if (eq (leftRight, rightRight))
-            then
-              Node {value=(getValue x.left); 
-              left=Node{value=x.value; left=leftLeft; right=rightLeft};
-              right=leftRight}
-      else
-        Node x 
-    else
-      Node x
+              if (eq (leftRight, rightRight))
+                then
+                  Node {value=(getValue x.left); 
+                  left=Node{value=x.value; left=leftLeft; right=rightLeft};
+                  right=leftRight}
+              else
+                if ((getValue x.left) = "*" && (getValue x.right) = "*") 
+                  then 
+                    if (eq (leftLeft, rightLeft))
+                      then
+                        Node {value=(getValue x.left); 
+                        left=Node{value=x.value; left=leftRight; right=rightRight};
+                        right=leftLeft}
+                    else
+                        if (eq (leftLeft, rightRight))
+                          then
+                            Node {value=(getValue x.left); 
+                            left=Node{value=x.value; left=leftRight; right=rightRight};
+                            right=leftLeft}
+                    else
+                        if (eq (leftRight, rightLeft))
+                          then
+                            Node {value=(getValue x.left); 
+                            left=Node{value=x.value; left=leftLeft; right=rightRight};
+                            right=leftRight} 
+                else
+                  Node x 
+              else
+                Node x
+            else
+              Node x 
+        else
+          Node x
 | Leaf -> Leaf
+
+let revDistHelper = function
+| Leaf -> Leaf
+| Node x -> 
+  let leftLeft = (getLeft x.left) in 
+    let leftRight = (getRight x.left) in 
+      let rightLeft = (getLeft x.right) in 
+        let rightRight = (getRight x.right) in 
+            if (x.value = "*" || x.value = "/")
+              then 
+                if (getValue x.left = "+" || getValue x.left = "-")
+                  then 
+                    Node {value=(getValue x.left); 
+                          left = Node {value=x.value; left=leftLeft; right=x.right};
+                          right= Node {value=x.value; left=leftRight; right=x.right}}
+            else
+              if (x.value = "*") 
+                then if (getValue x.right = "+" || getValue x.right = "-")
+                  then 
+                    Node {value=(getValue x.left); 
+                          left = Node {value=x.value; left=x.left; right=rightLeft};
+                          right= Node {value=x.value; left=x.left; right=rightRight}}
+          else 
+            Node x
+        else 
+          Node x 
+      else 
+        Node x 
+
+
 
 let rec genSub = fun s ->
   (* Generates all possible subtrees of a tree *)
@@ -374,6 +412,22 @@ let rec simplifyHelper = function
                 else
                   Node{value=x.value; left = leftSimplified ; right=rightSimplified}
 
+let _addzeroHelper = function
+  | Leaf -> Leaf
+  | Node x -> Node{value = "+"; left = Node{value=x.value; left=x.left; right=x.right}; right = trfy "(0)"}
+
+let _subzeroHelper = function
+  | Leaf -> Leaf
+  | Node x -> Node{value = "-"; left = Node{value=x.value; left=x.left; right=x.right}; right = trfy "(0)"}
+
+let _multoneHelper = function
+  | Leaf -> Leaf
+  | Node x -> Node{value = "*"; left = Node{value=x.value; left=x.left; right=x.right}; right = trfy "(1)"}
+
+let _divoneHelper = function
+  | Leaf -> Leaf
+  | Node x -> Node{value = "/"; left = Node{value=x.value; left=x.left; right=x.right}; right = trfy "(1)"} 
+
 let _add = fun s x ->
   (* Adds x on both sides of the equation *)
   op s x "+"
@@ -409,3 +463,23 @@ let _simplify = fun s i ->
 let _dist = fun s i ->
   (* Implements distributive property in tree structure *)
   dtrfy (treeop s i distHelper)  
+
+let _revdist = fun s i ->
+  (* Implements reverse distributive property (A+B)*x = Ax + Bx in tree structure*)
+  dtrfy (treeop s i revDistHelper)
+
+let _addzero = fun s i ->
+  (* Adds zero to a subtree *)
+  dtrfy (treeop s i _addzeroHelper)
+
+let _subzero = fun s i ->
+  (* Subtracts zero from a subtree *)
+  dtrfy (treeop s i _subzeroHelper)
+
+let _multone = fun s i ->
+  (* Multiplies subtree by 1 *)
+  dtrfy (treeop s i _multoneHelper)
+
+let _divone = fun s i ->
+  (* Divides subtree by 1 *)
+  dtrfy (treeop s i _divoneHelper)

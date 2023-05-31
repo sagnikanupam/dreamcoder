@@ -315,66 +315,95 @@ def _simplifyHelper(s):
       return detreefy(Tree(eqTree.root, left, right))
 
 def _distHelper(s):
+    eqTree = treefy(s)
+    if (eqTree.root == "-" or eqTree.root == "+"):
+        if (eqTree.left.root == "*" and eqTree.right.root == "*") or (eqTree.left.root == "/" and eqTree.right.root == "/"):
+            if (detreefy(eqTree.left.right) == detreefy(eqTree.right.right)):
+                return detreefy(Tree(eqTree.left.root,
+                    Tree(eqTree.root, eqTree.left.left, eqTree.right.left),
+                    eqTree.left.right))
+        if (eqTree.left.root == "*" and eqTree.right.root == "*"):
+            if (detreefy(eqTree.left.left) == detreefy(eqTree.right.left)):
+                return detreefy(Tree(eqTree.left.root,
+                    Tree(eqTree.root, eqTree.left.right, eqTree.right.right),
+                    eqTree.left.left))
+            if (detreefy(eqTree.left.right) == detreefy(eqTree.right.left)):
+                return detreefy(Tree(eqTree.left.root,
+                    Tree(eqTree.root, eqTree.left.left, eqTree.right.right),
+                    eqTree.left.right))
+            if (detreefy(eqTree.left.left) == detreefy(eqTree.right.right)):
+                return detreefy(Tree(eqTree.left.root,
+                    Tree(eqTree.root, eqTree.left.right, eqTree.right.left),
+                    eqTree.left.left))        
+    return s
+
+def _revDistHelper(s):
   eqTree = treefy(s)
-  if (eqTree.root == "-" or eqTree.root == "+") and (eqTree.left.root == "*" and eqTree.right.root
-      == "*"):
-    if (detreefy(eqTree.left.left) == detreefy(eqTree.right.left)):
-      return detreefy(
-        Tree(eqTree.left.root,
-             Tree(eqTree.root, eqTree.left.right, eqTree.right.right),
-             eqTree.left.left))
-    if (detreefy(eqTree.left.right) == detreefy(eqTree.right.left)):
-      return detreefy(
-        Tree(eqTree.left.root,
-             Tree(eqTree.root, eqTree.left.left, eqTree.right.right),
-             eqTree.left.right))
-    if (detreefy(eqTree.left.left) == detreefy(eqTree.right.right)):
-      return detreefy(
-        Tree(eqTree.left.root,
-             Tree(eqTree.root, eqTree.left.right, eqTree.right.left),
-             eqTree.left.left))
-    if (detreefy(eqTree.left.right) == detreefy(eqTree.right.right)):
-      return detreefy(
-        Tree(eqTree.left.root,
-             Tree(eqTree.root, eqTree.left.left, eqTree.right.left),
-             eqTree.left.right))
+  if (eqTree.root == "*" or eqTree.root=="/"):
+    if (eqTree.left.root=="+" or eqTree.left.root=="-"):
+        return detreefy(Tree(eqTree.left.root, Tree(eqTree.root, eqTree.left.left, eqTree.right), Tree(eqTree.root, eqTree.left.right, eqTree.right)))
+  if (eqTree.root == "*"):
+    if (eqTree.right.root=="+" or eqTree.right.root=="-"):
+        return detreefy(Tree(eqTree.right.root, Tree(eqTree.root, eqTree.left, eqTree.right.left), Tree(eqTree.root, eqTree.left, eqTree.right.right)))
   return s
 
+def _divoneHelper(s):
+  eqTree = treefy(s)
+  return detreefy(Tree("/", eqTree, Tree(1)))
+
+def _multoneHelper(s):
+  eqTree = treefy(s)
+  return detreefy(Tree("*", eqTree, Tree(1)))
+
+def _addzeroHelper(s):
+  eqTree = treefy(s)
+  return detreefy(Tree("+", eqTree, Tree(0)))
+
+def _subzeroHelper(s):
+  eqTree = treefy(s)
+  return detreefy(Tree("-", eqTree, Tree(0)))
 
 def _add(s, x):
   return _op(s, x, "+")
 
-
 def _sub(s, x):
   return _op(s, x, "-")
-
 
 def _mult(s, x):
   return _op(s, x, "*")
 
-
 def _div(s, x):
   return _op(s, x, "/")
-
 
 def _rrotate(s, i):
   return _treeOp(s, i, _rrotateHelper)
 
-
 def _lrotate(s, i):
   return _treeOp(s, i, _lrotateHelper)
-
 
 def _simplify(s, i):
   return _treeOp(s, i, _simplifyHelper)
 
-
 def _swap(s, i):
   return _treeOp(s, i, _swapHelper)
 
-
 def _dist(s, i):
   return _treeOp(s, i, _distHelper)
+
+def _revdist(s, i):
+  return _treeOp(s, i, _revDistHelper)
+
+def _addzero(s, i):
+  return _treeOp(s, i, _addzeroHelper)
+
+def _subzero(s, i):
+  return _treeOp(s, i, _subzeroHelper)
+
+def _multone(s, i):
+  return _treeOp(s, i, _multoneHelper)
+
+def _divone(s, i):
+  return _treeOp(s, i, _divoneHelper)
 
 
 def mathDomainPrimitives():
@@ -387,7 +416,12 @@ def mathDomainPrimitives():
         Primitive("mathDomain_lrotate", arrow(tstr, tint, tstr), _lrotate), 
         Primitive("mathDomain_simplify", arrow(tstr, tint, tstr), _simplify),
         Primitive("mathDomain_dist", arrow(tstr, tint, tstr), _dist),
-        Primitive("mathDomain_swap", arrow(tstr, tint, tstr), _swap)
+        Primitive("mathDomain_revdist", arrow(tstr, tint, tstr), _revdist),
+        Primitive("mathDomain_swap", arrow(tstr, tint, tstr), _swap),
+        Primitive("mathDomain_addzero", arrow(tstr, tint, tstr), _addzero),
+        Primitive("mathDomain_subzero", arrow(tstr, tint, tstr), _subzero),
+        Primitive("mathDomain_multone", arrow(tstr, tint, tstr), _multone),
+        Primitive("mathDomain_divone", arrow(tstr, tint, tstr), _divone)
     ] + [Primitive("mathDomain_"+str(x), tint, x) for x in range(0, LARGEST_CONSTANT+1)]
 
 '''

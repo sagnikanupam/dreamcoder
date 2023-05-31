@@ -211,6 +211,63 @@ def txt_infix_to_csv_prefix(inputAddress, outputAddress):
             print("Equation " + str(eq_num) + "......DONE ")
     df.to_csv(outputAddress)
     #Manually remove all equations with no solutions and fix the equations with Working column set to FALSE
-                            
+
+def csv_infix_to_csv_prefix(inputAddress, outputAddress):
+
+    """
+    Applies equation conversion from infix to prefix style on a .csv dataset. Solves the equations using Wolfram prior to saving all equations and solutions in both infix and prefix format.
+
+    Inputs:
+    - inputAddress is an address of a .txt file containing infix equations following a similar format as the conpole dataset. For example, an acceptable argument would be 'cognitiveTutorDataset.txt'.
+    - outputAddress is an address of a .csv file to where the new prefix and infix equations should be saved. For example, an acceptable argument would be'conpoleDatasetPrefix.csv'.
+    """
+
+    EQ_FILE_ADDRESS = inputAddress
+
+    df = pd.DataFrame({'Infix_Eq': [], 'Prefix_Eg': [], 'Working': [], 'Infix_Sol': [], 'Prefix_Sol': []})
+    
+    input_df = pd.read_csv(inputAddress, header=None)
+    print(input_df)
+    eq_num = 0
+    eq_list = input_df.iloc[:, 0].tolist()
+    print(eq_list)
+    new_eq_list = []
+    
+    #Swap Equations in Dataset (Optional)
+    for eq in eq_list:
+        new_eq_list.append(eq)
+    for eq in eq_list:    
+        terms = eq.split("=")
+        new_eq_list.append(f"{terms[1]}={terms[0]}")
+
+    for equation in new_eq_list:
+
+        appID = wolframAppID.appID() #This function returns the Wolfram Alpha App ID
+        client = wolframalpha.Client(appID)
+        response = client.query("Solve for x: "+equation)
+        solution = list(response.results)[-1].text #Last item of generator response
+
+        equation_new = equation
+        
+        for i in '1234567890':
+            equation_new = equation_new.replace(i+'x', i+' * x')
+
+        prefix_eq = infix_to_prefix_conversion(equation_new)
+        try:
+            if prefix_eq!=None and solution!="(no solutions exist)" and mdp.detreefy(mdp.treefy(prefix_eq))==prefix_eq:
+                #print("is",result)
+                prefix_sol = None
+                if solution is not None:
+                    prefix_sol = infix_to_prefix_conversion(solution)
+                df.loc[len(df.index)] = [equation, prefix_eq, mdp.detreefy(mdp.treefy(prefix_eq))==prefix_eq, solution, prefix_sol]
+        except Exception as e:
+                print(equation)
+                print(e)
+        eq_num+=1
+        print("Equation " + str(eq_num) + "......DONE ")
+    df.to_csv(outputAddress)
+    #Manually remove all equations with no solutions and fix the equations with Working column set to FALSE
+
+
 if __name__ == "__main__":
-    pass
+    csv_infix_to_csv_prefix("data/mathDomain/trainingEquations.csv", "data/mathDomain/trainingEquationsModified.csv") 
