@@ -25,7 +25,7 @@ NUM_TR = training_data.shape[0] #number of training examples
 #print(f"Number of Equations Used For Training: {NUM_TR}")
 #print(training_data)
 
-TESTING_DATASET_FILEPATH = Path.cwd()/'data'/'mathDomain'/'conpoleDatasetPrefixRandom.csv'
+TESTING_DATASET_FILEPATH = Path.cwd()/'data'/'mathDomain'/'conpoleDatasetPrefix.csv'
 #print(f"Testing Dataset From: {TESTING_DATASET_FILEPATH}")
 testing_data = pd.read_csv(TESTING_DATASET_FILEPATH) #pandas dataframe containing testing data
 NUM_TE = testing_data.shape[0] #number of training examples
@@ -54,7 +54,7 @@ if __name__ == "__main__":
         iterations=25, recognitionTimeout=3600,
         a=3, maximumFrontier=10, topK=2, pseudoCounts=30.0,
         helmholtzRatio=0.5, structurePenalty=1.,
-        CPUs=numberOfCPUs(), max_compression=180, featureExtractor=StringFeatureExtractor, recognition_0=["examples"])
+        CPUs=numberOfCPUs(), featureExtractor=StringFeatureExtractor, recognition_0=["examples"])
     
     timestamp = datetime.datetime.now().isoformat()
     outdir = 'experimentOutputs/demo/'
