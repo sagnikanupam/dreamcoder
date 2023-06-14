@@ -6,7 +6,7 @@ import math
 
 ops = ["+", "-", "*", "/"]
 
-LARGEST_CONSTANT = 10
+LARGEST_CONSTANT = 25
 
 class Tree:
 
