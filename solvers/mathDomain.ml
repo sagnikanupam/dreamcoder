@@ -428,6 +428,8 @@ let _divoneHelper = function
   | Leaf -> Leaf
   | Node x -> Node{value = "/"; left = Node{value=x.value; left=x.left; right=x.right}; right = trfy "(1)"} 
 
+let _newConstGen = fun a b c -> ((a*b)+c)
+
 let _add = fun s x ->
   (* Adds x on both sides of the equation *)
   op s x "+"

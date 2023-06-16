@@ -6,7 +6,7 @@ import math
 
 ops = ["+", "-", "*", "/"]
 
-LARGEST_CONSTANT = 25
+LARGEST_CONSTANT = 10
 
 class Tree:
 
@@ -347,6 +347,9 @@ def _revDistHelper(s):
         return detreefy(Tree(eqTree.right.root, Tree(eqTree.root, eqTree.left, eqTree.right.left), Tree(eqTree.root, eqTree.left, eqTree.right.right)))
   return s
 
+def _newConstGen(a, b, c):
+  return ((a*b)+c)
+
 def _divoneHelper(s):
   eqTree = treefy(s)
   return detreefy(Tree("/", eqTree, Tree(1)))
@@ -421,7 +424,8 @@ def mathDomainPrimitives():
         Primitive("mathDomain_addzero", arrow(tstr, tint, tstr), _addzero),
         Primitive("mathDomain_subzero", arrow(tstr, tint, tstr), _subzero),
         Primitive("mathDomain_multone", arrow(tstr, tint, tstr), _multone),
-        Primitive("mathDomain_divone", arrow(tstr, tint, tstr), _divone)
+        Primitive("mathDomain_divone", arrow(tstr, tint, tstr), _divone),
+        Primitive("mathDomain_newConstGen", arrow(tint, tint, tint, tint), _newConstGen)
     ] + [Primitive("mathDomain_"+str(x), tint, x) for x in range(0, LARGEST_CONSTANT+1)]
 
 '''
