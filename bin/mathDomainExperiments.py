@@ -86,7 +86,8 @@ if __name__ == "__main__":
     testing_examples = [{"name": "te"+str(k), "examples": [testing_equations_list[k] for _ in range(5000)]} for k in range(NUM_TE)]
 
     index_equations_list = [index_pair_X(k for k in range(11, 25))]
-    index_equations_list = [eq for eq in index_equations_list for _ in (0, 1)]
+    index_equations_list = [eq for eq in index_equations_list]
+    index_equations_list += index_equations_list
     index_examples = [{"name": "in"+str(k), "examples": [index_equations_list[k] for _ in range(5000)]} for k in range(len(index_equations_list))]
 
     training = [get_tstr_task(item) for item in training_examples] + [get_tint_task(item) for item in index_examples]
