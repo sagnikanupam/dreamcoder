@@ -212,7 +212,7 @@ def txt_infix_to_csv_prefix(inputAddress, outputAddress):
     df.to_csv(outputAddress)
     #Manually remove all equations with no solutions and fix the equations with Working column set to FALSE
 
-def csv_infix_to_csv_prefix(inputAddress, outputAddress):
+def csv_infix_to_csv_prefix(inputAddress, outputAddress, swap=False):
 
     """
     Applies equation conversion from infix to prefix style on a .csv dataset. Solves the equations using Wolfram prior to saving all equations and solutions in both infix and prefix format.
@@ -226,19 +226,21 @@ def csv_infix_to_csv_prefix(inputAddress, outputAddress):
 
     df = pd.DataFrame({'Infix_Eq': [], 'Prefix_Eg': [], 'Working': [], 'Infix_Sol': [], 'Prefix_Sol': []})
     
-    input_df = pd.read_csv(inputAddress, header=None)
+    input_df = pd.read_csv(inputAddress)
     print(input_df)
     eq_num = 0
     eq_list = input_df.iloc[:, 0].tolist()
-    print(eq_list)
+    #print(eq_list)
     new_eq_list = []
     
-    #Swap Equations in Dataset (Optional)
     for eq in eq_list:
         new_eq_list.append(eq)
-    for eq in eq_list:    
-        terms = eq.split("=")
-        new_eq_list.append(f"{terms[1]}={terms[0]}")
+        
+    #Swap Equations in Dataset (Optional)
+    if swap:
+        for eq in eq_list:    
+            terms = eq.split("=")
+            new_eq_list.append(f"{terms[1]}={terms[0]}")
 
     for equation in new_eq_list:
 
@@ -270,4 +272,4 @@ def csv_infix_to_csv_prefix(inputAddress, outputAddress):
 
 
 if __name__ == "__main__":
-    csv_infix_to_csv_prefix("data/mathDomain/trainingEquations.csv", "data/mathDomain/trainingEquationsModified.csv") 
+    csv_infix_to_csv_prefix("data/mathDomain/trainingEquations.csv", "data/mathDomain/trainingEquationsModified.csv", True) 

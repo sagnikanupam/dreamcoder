@@ -4,6 +4,7 @@ import binutil
 import dreamcoder.domains.mathDomain.mathDomainPrimitives as mdp
 import mathDomainPrefixConversion as mdpc
 from collections import OrderedDict 
+import random
 
 functions_dict = {
     '(_swap': mdp._swap, 
@@ -37,14 +38,14 @@ def replacements(s):
 
 def dsSolnFormat(dsSolnPath, eqnPath, outputSolnPath):
     '''
-    Given a .csv file containing solutions copied from the terminal output of DreamSolver, pass the solutions through replacements() and modify the solutions to make them more readable.
+    Given a .csv file containing solution program expressions copied from the terminal output of DreamSolver, pass the expressions through replacements() and modify the expressions to make them more readable.
     
     Inputs:
-        - dcSolnPath is a string containing a path to the .csv file containing the DreamSolver solution e.g.'bin/tempLargeDatasetSolns_1.csv'
+        - dsSolnPath is a string containing a path to the .csv file containing the DreamSolver solution e.g.'bin/tempLargeDatasetSolns_1.csv'
         - outputSolnPath is a string containing a path to the .csv where we would like to store our modified DreamSolver solutions
 
     Returns:
-        None
+        - None
     '''
 
     df = pd.read_csv(dsSolnPath)
@@ -194,6 +195,7 @@ def computeMetrics(steps):
 
     Inputs:
         - steps is a list of strings containing equations in prefix format, which can be accepted by mdp.treefy()
+
     Returns:
         - an integer denoting the total value of the metric function for that equation
     """
@@ -211,7 +213,7 @@ def clSolnEval(clSolnPath, outputSolnPath):
         - outputSolnPath is a string containing a path to the .csv where we would like to store our ConPoLe/Lemma solutions alongside their metric function values.
     
     Returns:
-        None
+        - None
     '''
     df = pd.read_csv(clSolnPath)
     metrics = []
@@ -236,7 +238,7 @@ def dsSolnEval(dsSolnPath, outputSolnPath):
         - outputSolnPath is a string containing a path to the .csv where we would like to store our DreamSolver solutions alongside their metric function values.
     
     Returns:
-        None
+        - None
     '''
     df = pd.read_csv(dsSolnPath)
     metrics = []
@@ -268,6 +270,14 @@ def dsSolnEval(dsSolnPath, outputSolnPath):
 def computeResults(ds, lemma, conpole):
     '''
     Computes metrics table in paper, takes as arguments the solutions files for DreamSolver, Lemma, and ConPoLe.
+
+    Inputs: 
+        - DreamSolver Solutions file with metric function computed
+        - Lemma Solutions file with metric function computed
+        - ConPoLe Solutions file with metric function computed
+
+    Returns:
+        - None 
     '''
     df_ds = pd.read_csv(ds)
     df_lm = pd.read_csv(lemma)
@@ -306,6 +316,85 @@ def computeResults(ds, lemma, conpole):
     print("%age of eqs Lemma solved: " + str(lm_numsolv/len(df_ds['equation_number'])))
     print("Lemma-ConPoLe metric: " + str(lm_cp_rel_conc/lm_cp_rel_conc_denom))
     print("DS-ConPoLe metric: " + str(ds_cp_rel_conc/ds_cp_rel_conc_denom))
+
+def genShorterEq(eq):
+    '''
+    Given an infix-notation string of an equation that DreamSolver cannot solve, generate a shorter, simpler equation. Assumes at most one bracket exists in infix form between two consecutive operations e.g. there is only one bracket between + and * in ((2/x)+3)*x)=5.
+    '''
+
+    eq = eq.replace(" ", "")
+    operator_list = []
+    for i in range(len(eq)):
+        if eq[i] in ["+", "-", "*", "/", "="]:
+            operator_list.append(i)
+    if len(operator_list)<2:
+        return eq
+    rand = random.randint(0, len(operator_list)-1)
+    chosen_op_ind = operator_list[rand]
+    if eq[chosen_op_ind]=="=":
+        if rand!=0:
+            chosen_op_ind=operator_list[rand-1]
+            rand -= 1
+        else:
+            chosen_op_ind=operator_list[rand+1]
+            rand += 1
+    end = None
+    if rand<len(operator_list)-1:
+        end = operator_list[rand+1]
+    else:
+        end = len(eq)
+    new_eq = eq[:chosen_op_ind] + eq[end:]
+    unmatched = None
+    for i in range(chosen_op_ind):
+        if new_eq[i]=="(":
+            close = matchBr(new_eq, i)
+            if close==None:
+                unmatched = i
+    if unmatched!=None:
+        new_eq = new_eq[:unmatched] + new_eq[unmatched+1:]
+    return new_eq
+
+def genAdditionalEquations(dsSolnPathOriginal, eqnPath, newDatasetPath,  dsSolnPathCurrIter=None):
+    ''' 
+    Given a .csv file containing solution program expressions copied from the terminal output of DreamSolver, identify the equations that DreamSolver failed to solve and generate a shorter variation of the equation.
+    
+    Inputs:
+        - dsSolnPathOriginal is the .csv file containing the original solution expressions generated purely by training DreamSolver
+        - eqnPath is the .csv file containing the original training equations
+        - newDatasetPath is a string containing a path to the .csv where we would like to store our newly generated equations
+        - dsSolnPathCurrIter is the optional .csv file to be used if we generated equations once and DreamSolver still failed to find any solutions.
+
+    Returns:
+        - None
+    '''
+    start = 0
+    df = None
+    if dsSolnPathCurrIter == None:
+        df = pd.read_csv(dsSolnPathOriginal)
+    else:
+        df_old = pd.read_csv(dsSolnPathOriginal)
+        df = pd.read_csv(dsSolnPathCurrIter)
+        start = df_old.shape[0]
+    df_eq = pd.read_csv(eqnPath)
+    df_eq = df_eq.drop(columns=df_eq.columns[0])
+    equation_numbering_list = []
+    unsolved_infix_eq_list = []
+
+    for i in range(start, df.shape[0]):
+        or_eq = df.loc[i]['output']
+        or_eq_split = or_eq.split(' ')
+        if or_eq_split[0]=="MISS":
+            eqn_no = or_eq_split[1][2:]
+            unsolved_infix_eq_list.append(str(df_eq.iat[int(eqn_no), 0]))
+            equation_numbering_list.append(eqn_no)
+    df_neweq = pd.DataFrame({'Infix_Eq': [], 'Prefix_Eg': [], 'Working': [], 'Infix_Sol': [], 'Prefix_Sol': []})
+    for eq in unsolved_infix_eq_list:
+        equation = genShorterEq(eq)
+        df_neweq.loc[len(df_neweq.index)] = [eq, None, None, None, None]
+        df_neweq.loc[len(df_neweq.index)] = [equation, None, None, None, None]
+    df_neweq.to_csv(newDatasetPath, index=False)
+    mdpc.csv_infix_to_csv_prefix(newDatasetPath, newDatasetPath)
+
 if __name__ == "__main__":
 
     '''
@@ -327,7 +416,25 @@ if __name__ == "__main__":
 
     s = "(= (+ (- (x) (5)) (3)) (2))"
     print(mdp._lrotate(mdp._rrotate(s, 1), 1))
-    '''
+    
     #dsSolnFormat('dc134soln.csv', 'conpoleDatasetPrefix.csv', 'dc134solnformatted.csv')
     dsSolnEval('dc134solnformatted.csv', 'dc134solnevaluated.csv')
     computeResults('dc134solnevaluated.csv', 'generatedLemmaSolutions-CScores.csv','generatedConpoleSolutions-CScores.csv')
+
+    '''
+
+    '''
+    Tests for evaluting shorter equation generation
+
+    #Copy Testing Equation to bin before running this
+    df = pd.read_csv('trainingEquationsModified.csv')
+    for i in range(df.shape[0]):
+        eq = str(df.iat[i, 1])
+        print(genShorterEq(eq))
+    '''
+
+    '''
+    Test for evaluating additional equation generation
+    '''
+    genAdditionalEquations('ds75of123soln6-21-2023.csv', 'trainingEquationsModified.csv', 'newDatasetTestingGenAdditionalEquations.csv')
+    
