@@ -85,7 +85,7 @@ if __name__ == "__main__":
     testing_equations_list = [test_pair_X(k) for k in range(NUM_TE)] #generate {"i":, "o":} dicts for the different testing examples
     testing_examples = [{"name": "te"+str(k), "examples": [testing_equations_list[k] for _ in range(5000)]} for k in range(NUM_TE)]
 
-    index_equations_list = [index_pair_X(k for k in range(11, 25))]
+    index_equations_list = [index_pair_X(k) for k in range(11, 25)]
     index_equations_list = [eq for eq in index_equations_list]
     index_equations_list += index_equations_list
     index_examples = [{"name": "in"+str(k), "examples": [index_equations_list[k] for _ in range(5000)]} for k in range(len(index_equations_list))]
