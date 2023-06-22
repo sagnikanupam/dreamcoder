@@ -15,8 +15,8 @@ class StringFeatureExtractor(RecurrentFeatureExtractor):
     special = None
     def tokenize(self, examples):
         def tokenize_example(xs, y):
-            x_chars = [list(word) for word in xs]
-            y_chars = list(y)
+            x_chars = [list(str(word)) for word in xs]
+            y_chars = list(str(y))
             return x_chars, y_chars
             
         return [tokenize_example(*e) for e in examples] 
