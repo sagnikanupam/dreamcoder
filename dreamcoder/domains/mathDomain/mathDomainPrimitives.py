@@ -279,6 +279,9 @@ def _evalTree(op, left, right):
     return detreefy(Tree(left * right))
   if op == "/":
     gcd = math.gcd(left, right)
+    if right < 0:
+      left = -1 * left
+      right = -1 * right
     if left%right==0:
       return detreefy(Tree(left // right))
     elif gcd not in [0, 1]:
@@ -407,7 +410,6 @@ def _multone(s, i):
 
 def _divone(s, i):
   return _treeOp(s, i, _divoneHelper)
-
 
 def mathDomainPrimitives():
     return [

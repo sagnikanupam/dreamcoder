@@ -198,6 +198,7 @@ let lrotatehelper = function
   | Leaf -> Leaf
 
 let distHelper = function
+  (* Helper function to perform a distribution operation on the tree *)
 | Node x ->   
 let leftLeft = (getLeft x.left) in 
   let leftRight = (getRight x.left) in 
@@ -269,8 +270,6 @@ let revDistHelper = function
           Node x 
       else 
         Node x 
-
-
 
 let rec genSub = fun s ->
   (* Generates all possible subtrees of a tree *)
@@ -367,8 +366,27 @@ let evalTree = fun x y z ->
 
 let rec gcd a b =
   (* Computes Greatest Common Divisor of Two Integers*)
-  if b = 0 then a
-  else gcd b (a mod b)
+  if a<0 then 
+    let c = -1*a in 
+      if b = 0 then c
+      else gcd b (c mod b)
+  else
+    if a = 0 then a
+    else
+      if b = 0 then a
+      else gcd b (a mod b)
+
+let div_evaluator var1 var2 leftVal rightVal rootval =
+  (* Evaluates division expressions where both terms are constants *)
+  if (var1 mod var2 = 0)
+    then 
+      Node {value = string_of_int (Option.get (evalTree leftVal rightVal rootval)); left=Leaf; right=Leaf} 
+    else
+      let currGCD = gcd var1 var2 in
+        Node {value = rootval; 
+              left=Node{value = string_of_int (var1 / currGCD); left=Leaf; right=Leaf}; 
+              right= Node {value = string_of_int (var2 / currGCD); left=Leaf; right=Leaf}}
+  
 
 let rec simplifyHelper = function
   (* Simplifies an operation on two constants in a tree with root operation and constant children *)
@@ -386,16 +404,15 @@ let rec simplifyHelper = function
           else
               if leftVal <> None &&  rightVal <> None && x.value = "/"
                 then
-                  let var1 = Option.get leftVal in
-                    let var2 = Option.get rightVal in
-                      if (var1 mod var2 = 0)
+                  let varA = Option.get leftVal in
+                    let varB = Option.get rightVal in
+                      if (varB<0)
                         then 
-                          Node {value = string_of_int (Option.get (evalTree leftVal rightVal x.value)); left=Leaf; right=Leaf} 
+                          let var1 = -1 * varA in
+                          let var2 = -1 * varB in
+                            div_evaluator var1 var2 leftVal rightVal x.value
                         else
-                          let currGCD = gcd var1 var2 in
-                            Node {value = x.value; 
-                                  left=Node{value = string_of_int (var1 / currGCD); left=Leaf; right=Leaf}; 
-                                  right= Node {value = string_of_int (var2 / currGCD); left=Leaf; right=Leaf}}
+                          div_evaluator varA varB leftVal rightVal x.value
               else
                 if ( (x.value = "+" && leftVal = Option.some 0) || ( x.value = "*" && leftVal = Option.some 1) )
                   then
@@ -413,22 +430,27 @@ let rec simplifyHelper = function
                   Node{value=x.value; left = leftSimplified ; right=rightSimplified}
 
 let _addzeroHelper = function
+  (* adds 0 to expression *)
   | Leaf -> Leaf
   | Node x -> Node{value = "+"; left = Node{value=x.value; left=x.left; right=x.right}; right = trfy "(0)"}
 
 let _subzeroHelper = function
+  (* subtracts 0 from expression *)
   | Leaf -> Leaf
   | Node x -> Node{value = "-"; left = Node{value=x.value; left=x.left; right=x.right}; right = trfy "(0)"}
 
 let _multoneHelper = function
+  (* multiplies expression with 1 *)
   | Leaf -> Leaf
   | Node x -> Node{value = "*"; left = Node{value=x.value; left=x.left; right=x.right}; right = trfy "(1)"}
 
 let _divoneHelper = function
+  (* divides expression by 1 *)
   | Leaf -> Leaf
   | Node x -> Node{value = "/"; left = Node{value=x.value; left=x.left; right=x.right}; right = trfy "(1)"} 
 
 let _newConstGen = fun a b c -> ((a*b)+c)
+  (* Generates new integers from existing primitives*)
 
 let _add = fun s x ->
   (* Adds x on both sides of the equation *)
