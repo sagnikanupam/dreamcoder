@@ -436,5 +436,6 @@ if __name__ == "__main__":
     '''
     Test for evaluating additional equation generation
     '''
-    genAdditionalEquations('ds75of123soln6-21-2023.csv', 'trainingEquationsModified.csv', 'newDatasetTestingGenAdditionalEquations.csv')
+    #genAdditionalEquations('ds75of123soln6-21-2023.csv', 'trainingEquationsModified.csv', 'newDatasetTestingGenAdditionalEquations.csv')
     
+    genAdditionalEquations('ds209of284soln7-10-2023.csv', 'conpoleDatasetPrefix.csv', 'newTestingEquations209of284soln7-10-2023.csv')

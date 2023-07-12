@@ -15,7 +15,7 @@ from dreamcoder.utilities import numberOfCPUs
 from dreamcoder.domains.re2.main import StringFeatureExtractor
 from dreamcoder.domains.mathDomain.mathDomainPrimitives import mathDomainPrimitives
 
-TRAINING_DATASET_FILEPATHS = [Path.cwd()/'data'/'mathDomain'/'06-21-2023TrainingEquationsShortenedExamples.csv']
+TRAINING_DATASET_FILEPATHS = [Path.cwd()/'data'/'mathDomain'/'newTestingEquations209of284soln7-10-2023']
 
 #print(f"Training Dataset From: {TRAINING_DATASET_FILEPATHS}")
 #Check Header on Training Dataset before passing as argument

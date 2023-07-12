@@ -247,8 +247,13 @@ def csv_infix_to_csv_prefix(inputAddress, outputAddress, swap=False):
         appID = wolframAppID.appID() #This function returns the Wolfram Alpha App ID
         client = wolframalpha.Client(appID)
         response = client.query("Solve for x: "+equation)
-        solution = list(response.results)[-1].text #Last item of generator response
-
+        solution = None
+        try:
+            solution = list(response.results)[-1].text #Last item of generator response
+        except:
+            print(f"Wolfram Generated No Solution for equation: {equation}")
+            solution = ''
+        
         equation_new = equation
         
         for i in '1234567890':
