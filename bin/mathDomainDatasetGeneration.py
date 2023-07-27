@@ -1,3 +1,7 @@
+'''
+Generate a random subset of equations.
+'''
+
 from pathlib import Path
 import random
 import binutil 

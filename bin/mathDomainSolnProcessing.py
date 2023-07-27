@@ -395,6 +395,36 @@ def genAdditionalEquations(dsSolnPathOriginal, eqnPath, newDatasetPath,  dsSolnP
     df_neweq.to_csv(newDatasetPath, index=False)
     mdpc.csv_infix_to_csv_prefix(newDatasetPath, newDatasetPath)
 
+def augmentDatasetEquations(originalDatasetPath, newDatasetPath, minGenSubLength):
+    '''
+    Given a dataset of equations, augment the equations in the dataset by generating shorter equations for all equations that have the total number of subtrees greater than the minGenSubLength.
+
+    Inputs:
+        - originalDatasetPath is a .csv file containing the original training equations
+        - newDatasetPath is a string containing a path to the .csv where we would like to store our newly generated equations
+        - minGenSubLength is an integer denoting the minimum length of _genSub(eq) that necessitates the addition of a shorter equation to the dataset
+
+    Returns:
+        - None
+
+    '''
+
+    df_eq = pd.read_csv(originalDatasetPath)
+    df_eq = df_eq.drop(columns=df_eq.columns[0])
+    df_neweq = pd.DataFrame({'Infix_Eq': [], 'Prefix_Eg': [], 'Working': [], 'Infix_Sol': [], 'Prefix_Sol': []})
+
+    for i in range(df_eq.shape[0]):
+        or_eq = df_eq.iat[i, 0]
+        pref = df_eq.iat[i, 1]
+        df_neweq.loc[len(df_neweq.index)] = [or_eq, None, None, None, None]
+        if len(mdp._genSub(pref)) > minGenSubLength:
+            new_eq = genShorterEq(or_eq)
+            df_neweq.loc[len(df_neweq.index)] = [new_eq, None, None, None, None]
+
+    df_neweq.to_csv(newDatasetPath, index=False)
+    mdpc.csv_infix_to_csv_prefix(newDatasetPath, newDatasetPath)
+
+
 if __name__ == "__main__":
 
     '''
@@ -425,7 +455,8 @@ if __name__ == "__main__":
 
     '''
     Tests for evaluting shorter equation generation
-
+    '''
+    '''
     #Copy Testing Equation to bin before running this
     df = pd.read_csv('trainingEquationsModified.csv')
     for i in range(df.shape[0]):
@@ -434,8 +465,17 @@ if __name__ == "__main__":
     '''
 
     '''
-    Test for evaluating additional equation generation
+    Test for evaluating additional equation generation from DreamSolver Solutions
     '''
-    #genAdditionalEquations('ds75of123soln6-21-2023.csv', 'trainingEquationsModified.csv', 'newDatasetTestingGenAdditionalEquations.csv')
+
+    '''
+    # genAdditionalEquations('ds75of123soln6-21-2023.csv', 'trainingEquationsModified.csv', 'newDatasetTestingGenAdditionalEquations.csv')
     
-    genAdditionalEquations('ds209of284soln7-10-2023.csv', 'conpoleDatasetPrefix.csv', 'newTestingEquations209of284soln7-10-2023.csv')
+    # genAdditionalEquations('ds209of284soln7-10-2023.csv', 'conpoleDatasetPrefix.csv', 'newTestingEquations209of284soln7-10-2023.csv')
+    '''
+
+    '''
+    Test for evaluating additional equation generation from the entire ConPoLe dataset
+    '''
+
+    augmentDatasetEquations('csv_datasets/conpoleDatasetPrefix.csv', 'csv_datasets/augmentDatasetEquations7-27-2023.csv', 5)
