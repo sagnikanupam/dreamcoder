@@ -474,8 +474,12 @@ if __name__ == "__main__":
     # genAdditionalEquations('ds209of284soln7-10-2023.csv', 'conpoleDatasetPrefix.csv', 'newTestingEquations209of284soln7-10-2023.csv')
     '''
 
+    genAdditionalEquations('csv_datasets/augmentation-no-golden-07-28-23/iteration4successes-07-28-23.csv', 'csv_datasets/conpoleDatasetPrefix.csv', 'csv_datasets/augmentation-no-golden-07-28-23/augmentedIteration4-07-28-23.csv')
+
     '''
     Test for evaluating additional equation generation from the entire ConPoLe dataset
     '''
 
+    '''
     augmentDatasetEquations('csv_datasets/conpoleDatasetPrefix.csv', 'csv_datasets/augmentDatasetEquations7-27-2023.csv', 5)
+    '''

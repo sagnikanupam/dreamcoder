@@ -15,7 +15,7 @@ from dreamcoder.utilities import numberOfCPUs
 from dreamcoder.domains.re2.main import StringFeatureExtractor
 from dreamcoder.domains.mathDomain.mathDomainPrimitives import mathDomainPrimitives
 
-TRAINING_DATASET_FILEPATHS = [Path.cwd()/'data'/'mathDomain'/'newTestingEquations209of284soln7-10-2023.csv']
+TRAINING_DATASET_FILEPATHS = [Path.cwd()/'data'/'mathDomain'/'augmentedIteration4-07-28-23.csv']
 
 #print(f"Training Dataset From: {TRAINING_DATASET_FILEPATHS}")
 #Check Header on Training Dataset before passing as argument
@@ -61,7 +61,7 @@ if __name__ == "__main__":
     print("Testing on: " + str(NUM_TE) + " examples.")
     args = commandlineArguments(
         enumerationTimeout=1800, activation='tanh',
-        iterations=25, recognitionTimeout=3600,
+        iterations=5, recognitionTimeout=3600,
         a=3, maximumFrontier=10, topK=2, pseudoCounts=30.0,
         helmholtzRatio=0.5, structurePenalty=1.,
         CPUs=numberOfCPUs(), featureExtractor=StringFeatureExtractor, recognition_0=["examples"])
@@ -90,7 +90,7 @@ if __name__ == "__main__":
     index_equations_list += index_equations_list
     index_examples = [{"name": "in"+str(k), "examples": [index_equations_list[k] for _ in range(5000)]} for k in range(len(index_equations_list))]
 
-    training = [get_tstr_task(item) for item in training_examples] + [get_tint_task(item) for item in index_examples]
+    training = [get_tstr_task(item) for item in training_examples] #+ [get_tint_task(item) for item in index_examples]
     #+ [get_tstr_task(item_2) for item_2 in testing_examples]
 
     print("Example of testing equation: " + str(testing_equations_list[0]))
