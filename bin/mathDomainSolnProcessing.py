@@ -387,7 +387,7 @@ def genAdditionalEquations(dsSolnPathOriginal, eqnPath, newDatasetPath,  dsSolnP
             eqn_no = or_eq_split[1][2:]
             unsolved_infix_eq_list.append(str(df_eq.iat[int(eqn_no), 0]))
             equation_numbering_list.append(eqn_no)
-    df_neweq = pd.DataFrame({'Infix_Eq': [], 'Prefix_Eg': [], 'Working': [], 'Infix_Sol': [], 'Prefix_Sol': []})
+    df_neweq = pd.DataFrame({'Infix_Eq': [], 'Prefix_Eq': [], 'Working': [], 'Infix_Sol': [], 'Prefix_Sol': []})
     for eq in unsolved_infix_eq_list:
         equation = genShorterEq(eq)
         df_neweq.loc[len(df_neweq.index)] = [eq, None, None, None, None]
@@ -411,7 +411,7 @@ def augmentDatasetEquations(originalDatasetPath, newDatasetPath, minGenSubLength
 
     df_eq = pd.read_csv(originalDatasetPath)
     df_eq = df_eq.drop(columns=df_eq.columns[0])
-    df_neweq = pd.DataFrame({'Infix_Eq': [], 'Prefix_Eg': [], 'Working': [], 'Infix_Sol': [], 'Prefix_Sol': []})
+    df_neweq = pd.DataFrame({'Infix_Eq': [], 'Prefix_Eq': [], 'Working': [], 'Infix_Sol': [], 'Prefix_Sol': []})
 
     for i in range(df_eq.shape[0]):
         or_eq = df_eq.iat[i, 0]
