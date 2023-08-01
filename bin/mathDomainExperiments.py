@@ -15,7 +15,7 @@ from dreamcoder.utilities import numberOfCPUs
 from dreamcoder.domains.re2.main import StringFeatureExtractor
 from dreamcoder.domains.mathDomain.mathDomainPrimitives import mathDomainPrimitives
 
-TRAINING_DATASET_FILEPATHS = [Path.cwd()/'data'/'mathDomain'/'augmentedIteration4-07-28-23.csv']
+TRAINING_DATASET_FILEPATHS = [Path.cwd()/'data'/'mathDomain'/'augmentedIteration5-08-01-23.csv']
 
 #print(f"Training Dataset From: {TRAINING_DATASET_FILEPATHS}")
 #Check Header on Training Dataset before passing as argument
@@ -61,7 +61,7 @@ if __name__ == "__main__":
     print("Testing on: " + str(NUM_TE) + " examples.")
     args = commandlineArguments(
         enumerationTimeout=1800, activation='tanh',
-        iterations=5, recognitionTimeout=3600,
+        iterations=10, recognitionTimeout=3600,
         a=3, maximumFrontier=10, topK=2, pseudoCounts=30.0,
         helmholtzRatio=0.5, structurePenalty=1.,
         CPUs=numberOfCPUs(), featureExtractor=StringFeatureExtractor, recognition_0=["examples"])
