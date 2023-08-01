@@ -181,7 +181,7 @@ def txt_infix_to_csv_prefix(inputAddress, outputAddress):
 
     EQ_FILE_ADDRESS = inputAddress
 
-    df = pd.DataFrame({'Infix_Eq': [], 'Prefix_Eg': [], 'Working': [], 'Infix_Sol': [], 'Prefix_Sol': []})
+    df = pd.DataFrame({'Infix_Eq': [], 'Prefix_Eq': [], 'Working': [], 'Infix_Sol': [], 'Prefix_Sol': []})
     
     with open(EQ_FILE_ADDRESS) as equationsFile:        
 
@@ -224,7 +224,7 @@ def csv_infix_to_csv_prefix(inputAddress, outputAddress, swap=False):
 
     EQ_FILE_ADDRESS = inputAddress
 
-    df = pd.DataFrame({'Infix_Eq': [], 'Prefix_Eg': [], 'Working': [], 'Infix_Sol': [], 'Prefix_Sol': []})
+    df = pd.DataFrame({'Infix_Eq': [], 'Prefix_Eq': [], 'Working': [], 'Infix_Sol': [], 'Prefix_Sol': []})
     
     input_df = pd.read_csv(inputAddress)
     print(input_df)
